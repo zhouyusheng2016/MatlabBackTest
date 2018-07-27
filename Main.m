@@ -45,6 +45,3 @@ Context.fast = 2;
 Context.slow = 5;
 [Asset2,DB2] = Backtest(@Strategy,Context,{'600000.SH','600300.SH'},'2014-12-02 09:00:00','2015-7-31 12:00:00',Options);
 %% TEst
-HisDB = HisOptionData(TDB,num2cell(codes),Options);
-HisDB = HisData(DB,windcode,Options);
-HisDB = HisFutureData(DB,windcode,Options);
