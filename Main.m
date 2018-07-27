@@ -1,5 +1,11 @@
 %% set path to backtest frame work folder
-path(path,genpath('E:\Matlab2017a\bin\BackTestFrameWork'));                 % added
+backtestDicPath = strcat(matlabroot,'\bin\MatlabBackTest\');
+futrueDicPath = strcat(backtestDicPath,'Future');
+optionDicPath = strcat(backtestDicPath,'Option');
+stockDicPath = strcat(backtestDicPath,'Stock');
+path(path,genpath(futrueDicPath));                 % added
+path(path,genpath(optionDicPath));                 % added
+path(path,genpath(stockDicPath));                 % added
 %% »Ø²âÄ£°å
 % Version/Date:     0.2 / 2017.10.30
 %% Options
