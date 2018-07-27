@@ -1,4 +1,4 @@
-function [TDB flag] = LoadOptionData_Local(filename,start_time,end_time,Options)
+function [TDB flag] = LoadOptionData_Local(filename,start_time,end_time,underlyingCode,Options)
 % 期权数据导入
 delimiter = ',';
 startRow = 2;
@@ -124,7 +124,7 @@ clearvars filename delimiter startRow formatSpec fileID dataArray ans raw col nu
     dateFormatIndex dates blankDates anyBlankDates invalidDates anyInvalidDates ...
     rawNumericColumns rawStringColumns R catIdx idx;
 OptionDataTable = sortrows(OptionDataTable,'date','ascend');%日期排序
-%[optionTradeDateNum,~] = sort(unique(datenum(num2str(OptionDataTable.date),'yyyyMMdd'))); %期权交易日顺序列表
+
 
 % 截取时间数据
 start_datenum = datenum(start_time, 'yyyy-mm-dd');
@@ -135,27 +135,25 @@ cond2 = optionDataDatenum<=end_datenum;
 OptionDataTable = OptionDataTable(cond1 & cond2,:);
 OptionDataTable = sortrows(OptionDataTable,'date','ascend');%日期排序
 w_wsd_times_0 =unique(datenum(num2str(OptionDataTable.date),'yyyymmdd'));
-
+timeLength = length(w_wsd_times_0);
 % 构建期权代码引索表
 codes = unique(OptionDataTable.code);
 %设置游标
 TDB.CurrentK = 1;
 for code = codes'
-    idx = OptionDataTable.code == code;
-    idx_code_opt = find(idx);
+    idx_code_opt = OptionDataTable.code == code;
     thisOpt = OptionDataTable(idx_code_opt,:);
     thisOpt = sortrows(thisOpt,'date','ascend');%日期排序
-    
-    DB.Type = 'O';
+   
     dataTime = datenum(num2str(thisOpt.date),'yyyymmdd');
     DB.Times = w_wsd_times_0;
     DB.TimesStr = datestr(w_wsd_times_0,'yymmdd');%按年月日格式的时间戳（交易日）
-    timeLength = length(w_wsd_times_0);
     [~,idx_haveData,~] = intersect(w_wsd_times_0,dataTime);
     % 期权合约信息
     structName = code2structname(num2str(code), 'O');
     DB.Code =  num2str(code);
-    DB.Info = {thisOpt.Strike(1), thisOpt.Expiration(1),thisOpt.UnderlyingSymbol(1)};
+    %记录C/P 到期日 标的代码
+    DB.Info = {thisOpt.OptionType(1) thisOpt.Expiration(1) thisOpt.UnderlyingSymbol(1)};
     % 期权行情信息
     DB.Open = nan(timeLength,1);
     DB.Open(idx_haveData) = thisOpt.open;%开
@@ -167,9 +165,18 @@ for code = codes'
     DB.Close(idx_haveData) = thisOpt.Last;%收
     DB.Volume = nan(timeLength,1);
     DB.Volume(idx_haveData) = thisOpt.Volume;%量
+    % 期权行权价格
+    DB.Strike = nan(timeLength,1);
+    DB.Strike(idx_haveData) = thisOpt.Strike;
+    % 期权符号
+    DB.Symbol = cell(timeLength,1);
+    DB.Symbol(idx_haveData,:) = cellstr(thisOpt.OptionSymbol);
+    % 期权合约乘数
+    DB.ContractUnit = nan(timeLength,1);
+    DB.ContractUnit(idx_haveData) = thisOpt.contractunit;
+    % 期权
     % 期权其他信息
     DB.OpenInterest = nan(timeLength,1);
-    DB.contractunit = nan(timeLength,1);
     DB.DaysUntilExpiration = nan(timeLength,1);
     DB.TimeUntilExpiration = nan(timeLength,1);
     DB.InterestRate = nan(timeLength,1);
@@ -188,7 +195,6 @@ for code = codes'
     DB.hv180 = nan(timeLength,1);
     
     DB.OpenInterest(idx_haveData) = thisOpt.OpenInterest;
-    DB.contractunit(idx_haveData)= thisOpt.contractunit;
     DB.DaysUntilExpiration(idx_haveData)= thisOpt.DaysUntilExpiration;
     DB.TimeUntilExpiration(idx_haveData)= thisOpt.TimeUntilExpiration;
     DB.InterestRate(idx_haveData)= thisOpt.InterestRate;
@@ -213,6 +219,25 @@ for code = codes'
 end
 TDB.Times = w_wsd_times_0;
 TDB.TimesStr = datestr(w_wsd_times_0,'yymmdd');%按年月日格式的时间戳（交易日）
+
+%加载期权underlying Asset的数据
+% 行情数据
+[w_wsd_data_0,w_wsd_codes_0,w_wsd_fields_0,w_wsd_times_0,w_wsd_errorid_0,w_wsd_reqid_0]= ...
+    w.wsd(underlyingCode,'open,high,low,close,volume,vwap',start_time,end_time,'PriceAdj=F');
+if w_wsd_errorid_0~=0
+    disp(['!!! 加载' windcode '行情数据错误: ' w_wsd_data_0{1} ' Code: ' num2str(w_wsd_errorid_0) ' !!!']);
+    flag=0;
+    return;
+end
+Underlying.Times = w_wsd_times_0;
+Underlying.TimesStr = datestr(w_wsd_times_0,'yymmdd');
+Underlying.Open = w_wsd_data_0(:,1);
+Underlying.High = w_wsd_data_0(:,2);
+Underlying.Low = w_wsd_data_0(:,3);
+Underlying.Close = w_wsd_data_0(:,4);
+Underlying.Volume = w_wsd_data_0(:,5);
+Underlying.Vwap = w_wsd_data_0(:,6);
+TDB=setfield(TDB,'Underlying',Underlying);
 
 %数据加载成功
 flag=1;
