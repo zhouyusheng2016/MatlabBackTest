@@ -1,4 +1,15 @@
 %% this is unit test of Futrue Trading Frame
+%% 导入路径
+backtestDicPath = strcat(matlabroot,'\bin\MatlabBackTest\');
+futrueDicPath = strcat(backtestDicPath,'Future');
+optionDicPath = strcat(backtestDicPath,'Option');
+stockDicPath = strcat(backtestDicPath,'Stock');
+path(path,genpath(backtestDicPath));
+path(path,genpath(futrueDicPath));                 % added 期货path
+path(path,genpath(optionDicPath));                 % added 
+path(path,genpath(stockDicPath));                 % added
+
+%% 开始测试
 % the wind obj
 w = windmatlab;
 % Future settings
