@@ -26,8 +26,8 @@ for k=0:Options.DelayDays % 交易失败则延迟交易
         %合约存续
         today = Data.Times(I+OrderDay+k);
         lasttrade_date = datenum(datetime(Data.Info{1}));
-        cond(4) = today<=lasttrade_date;                                    %下单时间合约是否到期
-        if cond(1) && cond(2) && cond(3) && cond(4)
+        cond(2) = today<=lasttrade_date;                                    %下单时间合约是否到期
+        if cond(1) && cond(2)
             flag = 1;
             break;
         else
@@ -35,12 +35,6 @@ for k=0:Options.DelayDays % 交易失败则延迟交易
                 reason = '交易数据不存在';
             end
             if cond(2)==0
-                reason = '跌停';
-            end
-            if cond(3)==0
-                reason = '涨停';
-            end
-            if cond(4) == 0
                 reason = '超过最后交易日';
             end
             disp(['Bar' num2str(I) '@' DB.TimesStr(I+OrderDay,:) ' Message: ' stock reason '导致交易失败，尝试延迟' num2str(k+1) '天' ordertype]);
