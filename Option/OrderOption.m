@@ -25,7 +25,7 @@ for k=0:Options.DelayDays % 交易失败则延迟交易
         cond(1) = sum(cond_)==4;                                            %今日数据存在
         %合约存续
         today = Data.Times(I+OrderDay+k);
-        lasttrade_date = datenum(datetime(Data.Info{1}));
+        lasttrade_date = datenum(datetime(Data.Info{2}));
         cond(2) = today<=lasttrade_date;                                    %下单时间合约是否到期
         if cond(1) && cond(2)
             flag = 1;
