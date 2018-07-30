@@ -239,5 +239,7 @@ Underlying.Volume = w_wsd_data_0(:,5);
 Underlying.Vwap = w_wsd_data_0(:,6);
 TDB=setfield(TDB,'Underlying',Underlying);
 
+TDB.NK = length(Underlying.Times);
+
 %数据加载成功
 flag=1;
