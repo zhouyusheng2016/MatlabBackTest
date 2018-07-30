@@ -139,7 +139,7 @@ timeLength = length(w_wsd_times_0);
 % 构建期权代码引索表
 codes = unique(OptionDataTable.code);
 %设置游标
-TDB.CurrentK = 1;
+TDB = struct;
 for code = codes'
     idx_code_opt = OptionDataTable.code == code;
     thisOpt = OptionDataTable(idx_code_opt,:);
@@ -238,7 +238,7 @@ Underlying.Close = w_wsd_data_0(:,4);
 Underlying.Volume = w_wsd_data_0(:,5);
 Underlying.Vwap = w_wsd_data_0(:,6);
 TDB=setfield(TDB,'Underlying',Underlying);
-
+TDB.CurrentK = 1;
 TDB.NK = length(Underlying.Times);
 
 %数据加载成功
