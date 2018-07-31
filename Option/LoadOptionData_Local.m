@@ -223,7 +223,7 @@ TDB.TimesStr = datestr(w_wsd_times_0,'yymmdd');%按年月日格式的时间戳（交易日）
 %加载期权underlying Asset的数据
 % 行情数据
 [w_wsd_data_0,w_wsd_codes_0,w_wsd_fields_0,w_wsd_times_0,w_wsd_errorid_0,w_wsd_reqid_0]= ...
-    w.wsd(underlyingCode,'open,high,low,close,volume,vwap',start_time,end_time,'PriceAdj=F');
+    w.wsd(underlyingCode,'open,high,low,close,volume,vwap,pre_close',start_time,end_time,'PriceAdj=F');
 if w_wsd_errorid_0~=0
     disp(['!!! 加载' windcode '行情数据错误: ' w_wsd_data_0{1} ' Code: ' num2str(w_wsd_errorid_0) ' !!!']);
     flag=0;
@@ -237,6 +237,7 @@ Underlying.Low = w_wsd_data_0(:,3);
 Underlying.Close = w_wsd_data_0(:,4);
 Underlying.Volume = w_wsd_data_0(:,5);
 Underlying.Vwap = w_wsd_data_0(:,6);
+Underlying.PreClose = w_wsd_data_0(:,7);
 TDB=setfield(TDB,'Underlying',Underlying);
 TDB.CurrentK = 1;
 TDB.NK = length(Underlying.Times);

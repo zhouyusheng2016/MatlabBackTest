@@ -52,5 +52,5 @@ HisDB.Underlying.Low = HisDB.Underlying.Low(1:I,:);
 HisDB.Underlying.Close = HisDB.Underlying.Close(1:I,:);
 HisDB.Underlying.Volume = HisDB.Underlying.Volume(1:I,:);
 HisDB.Underlying.Vwap = HisDB.Underlying.Vwap(1:I,:);
-
+HisDB.Underlying.PreClose = HisDB.Underlying.PreClose(1:I,:);
 end
