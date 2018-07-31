@@ -7,6 +7,7 @@ Asset.TimesStr = DB.TimesStr;
 Asset.CurrentPosition = 0;
 Asset.CurrentStock = [];
 Asset.CurrentMargins = [];
+Asset.CurrentMarginStock = [];
 % 下单量序列
 Asset.OrderVolume = cell(NT,1);
 % 下单价序列
@@ -29,6 +30,8 @@ Asset.Stock = cell(NT,1);
 Asset.Cash = zeros(NT,1);
 % 各合约已用保证金
 Asset.Margins = cell(NT,1);
+% 各合约保证金合约名
+Asset.MarginStock = cell(NT,1);
 % 上次计算可用保证金以及已用保证金的证券代码
 Asset.SettleCode = cell(NT,1);
 % 上次计算可用保证金以及已用保证金的结算价格
