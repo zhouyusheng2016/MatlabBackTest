@@ -17,9 +17,10 @@ MarginCallAmount = [];                                                      %´ß½
 ExpiredContract = {};                                                       %µ½ÆÚºÏÔ¼´úÂë
 ExpiredContractPosition = {};                                               %µ½ÆÚºÏÔ¼ÊıÁ¿
 ExpiredContractSettlePrice ={};                                             %µ½ÆÚºÏÔ¼¼Û¸ñ    
+
 for i = 1:length(Asset.CurrentStock)
     Data=getfield(DB,code2structname(Asset.CurrentStock{i},'F'));                 %ºÏÔ¼ĞĞÇé
-    lastTradeDateTime = datetime(Data.Info{1});                                        %ºÏÔ¼×îºó½»Ò×ÈÕ -- Á¬ĞøºÏÔ¼µÄ×îºó½»Ò×ÈÕÓ¦¸ÃÊÇµ±Ç°ºÏÔ¼µÄ×îºó½»Ò×ÈÕ£¨ÍòµÂÊı¾İ¹æÔò£©
+    lastTradeDateTime = datetime(Data.Info{1});                             %ºÏÔ¼×îºó½»Ò×ÈÕ -- Á¬ĞøºÏÔ¼µÄ×îºó½»Ò×ÈÕÓ¦¸ÃÊÇµ±Ç°ºÏÔ¼µÄ×îºó½»Ò×ÈÕ£¨ÍòµÂÊı¾İ¹æÔò£©
     contractInfo = GetFutureContractInfo(Data);                             %ºÏÔ¼ĞÅÏ¢
     %% ½áËãĞÅÏ¢
     settlePrice = Data.Settle(I);                                           %ºÏÔ¼µ±ÈÕ½áËã¼Û¸ñ
@@ -89,6 +90,12 @@ for i = 1:length(Asset.CurrentStock)
         Asset.CurrentPosition(i) = 0;                                             %ÊÍ·Å²ÖÎ»
     end
 end
+%Èç¹û½»Ò×ºóµ¼ÖÂ²¿·ÖºÏÔ¼¿Õ²Ö£¬ÔÚµ±Ç°³Ö²ÖÖĞÇå³ı¿Õ²ÖµÄºÏÔ¼
+idxClearEmpty = Asset.CurrentPosition == 0;
+Asset.CurrentStock(idxClearEmpty) = [];
+Asset.CurrentPosition(idxClearEmpty) = [];
+Asset.CurrentMargins(idxClearEmpty) = [];
+
 %¿ÉÓÃ±£Ö¤½ğ£¬ÒÑÓÃ±£Ö¤½ğ¸üĞÂ
 Asset.Cash(I) = AvaCash;
 Asset.FrozenCash(I) = FrozenCash;
