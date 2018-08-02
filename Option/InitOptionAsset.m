@@ -22,6 +22,8 @@ Asset.DealPrice = cell(NT,1);
 Asset.DealStock = cell(NT,1);
 % 成交手续费序列
 Asset.DealFee = cell(NT,1);
+% 结算手续费序列
+Asset.SettlementFee = cell(NT,1);
 % 持仓量序列
 Asset.Position = cell(NT,1);
 % 持仓标的序列
