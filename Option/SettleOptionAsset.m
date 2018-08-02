@@ -2,14 +2,6 @@ function Asset = SettleOptionAsset(Asset,DB,Options)
 % 用于每日保证金变化
 % 用于每日clearing 结束后
 I = DB.CurrentK;%当日游标
-% 本交易日前的信息
-if I == 1
-    PreStock = [];
-    PrePosition = [];
-else
-    PreStock = Asset.Stock{I-1};
-    PrePosition = Asset.Position{I-1};
-end
 
 AvaCash = Asset.Cash(I);                                                    %撮合订单后的可用保证金
 FrozenCash = Asset.FrozenCash(I);                                           %撮合订单后的已用保证金总和
@@ -48,6 +40,8 @@ for i = 1:length(Asset.CurrentStock)
             if isempty(releaseMargin)
                 error('settleOptionAsset.m: negative position but no margin found')
             end
+            %释放保证金
+            Asset.CurrentMargins(idx_thisStockMargin) = 0;
         end
         settlementFee = Options.SettlementFeePerContract*abs(Asset.CurrentPosition(i));
         AvaCash = AvaCash + payoff + releaseMargin - settlementFee;
@@ -57,8 +51,7 @@ for i = 1:length(Asset.CurrentStock)
         ExpiredContractPosition = [ExpiredContractPosition Asset.CurrentPosition(i)];
         ExpiredContractSettlePrice = [ExpiredContractSettlePrice, payoff/Asset.CurrentPosition(i)];
         Asset.SettlementFee{I}= [Asset.SettlementFee{I} settlementFee];
-        % 释放仓位 保证金
-        Asset.CurrentMargins(i) = 0;
+        % 释放仓位
         Asset.CurrentPosition(i) = 0;
         continue;
     end
