@@ -23,21 +23,20 @@ MarginCallAmount = [];                                                      %´ß½
 ExpiredContract = {};                                                       %µ½ÆÚºÏÔ¼´úÂë
 ExpiredContractPosition = {};                                               %µ½ÆÚºÏÔ¼ÊıÁ¿
 ExpiredContractSettlePrice ={};                                             %µ½ÆÚºÏÔ¼¼Û¸ñ    
-
+today = DB.Times(I);                                                      %½áËãµ±ÈÕÈÕÆÚ
 for i = 1:length(Asset.CurrentStock)
     %% ºÏÔ¼ĞÅÏ¢
     Data=getfield(DB,code2structname(Asset.CurrentStock{i},'O')); 
     contractInfo = GetOptionContractInfo(Data);                             %ºÏÔ¼»ù±¾ĞÅÏ¢
     contractUnit = Data.ContractUnit(I);                                    %ºÏÔ¼µ¥Î»
     Strike = Data.Strike(I);                                                %ºÏÔ¼ĞĞÈ¨¼Û
-    
-    today = Data.Times(I);                                                  %½áËãµ±ÈÕÈÕÆÚ
+
     lasttrade_date = datenum(Data.Info{2});                                 %ºÏÔ¼µ½ÆÚÈÕ
     flag_atExpirary = lasttrade_date == today;                              %ºÏÔ¼µ½ÆÚ±êÖ¾
     if lasttrade_date < today
        error('SettleOptionAsset.m: passed last trade date, need deliver')   %½»¸î 
     end
-    %% ºÏÔ¼µ½ÆÚ
+    %% ºÏÔ¼µ½ÆÚ½áËã
     if flag_atExpirary
         % ½áËãºÏÔ¼
         payoff = CalculateOptionPayoff(DB.Underlying.Close(I), Strike,...
@@ -63,7 +62,7 @@ for i = 1:length(Asset.CurrentStock)
         Asset.CurrentPosition(i) = 0;
         continue;
     end
-    %% ÒåÎñ²ÖÒıÆğµÄ±£Ö¤½ğ±ä»¯
+    %% ÒåÎñ²Ö±£Ö¤½ğ´ß½É
     % Ìø¹ı·ÇÒåÎñ²Ö
     if Asset.CurrentPosition(i)>=0
        continue; 
@@ -76,53 +75,16 @@ for i = 1:length(Asset.CurrentStock)
     else
         error('SettleOptionAsset.m: Undefined Settle Price')
     end
-     %% È·¶¨ÉÏ´Î½áËã¼Û
-    idx_thisStockTodayDeal = strcmp(Asset.CurrentStock(i), Asset.DealStock{I});  %½ñÈÕ±¾ºÏÔ¼µÄ¿ª²Ö
-    todayDealVolume = 0;
-    todayDealPrice = 0;
-    if sum(idx_thisStockTodayDeal) ~= 0
-        todayDealVolume = Asset.DealVolume{I}(idx_thisStockTodayDeal);     %ºÏÔ¼½ñÈÕ¿ª²ÖÁ¿
-        todayDealPrice = Asset.DealPrice{I}(idx_thisStockTodayDeal);       %ºÏÔ¼½ñÈÕ¿ª²Ö¼Û¸ñ 
-    end
-    % ±¾ºÏÔ¼½ñÈÕÖ®Ç°µÄ²ÖÎ»
-    idx_thisStockLastDayEnd = strcmp(Asset.CurrentStock(i), PreStock);            % ×òÈÕ´æĞøµÄºÏÔ¼
-    lastDayEndPosition = 0;                                                 % ×òÈÕ´æĞøºÏÔ¼Á¿
-    lastDayEndSettlePrice = 0;                                              % ×òÈÕ½áËã¼Û
-    contractUnitLastDay = contractUnit;                                     % ×òÈÕºÏÔ¼³ËÊı
-    if sum(idx_thisStockLastDayEnd) ~= 0
-        lastDayEndPosition = PrePosition(idx_thisStockLastDayEnd);
-        lastDayEndSettlePrice = GetOptionContractPreSettlePriceByType( Data, I, Options.OptLastSettlementType);
-        contractUnitLastDay = Data.ContractUnit(I-1);                       
-    end
-    
-    %% ·Ö±ğ¼ÆËã±£Ö¤½ğ±ä¶¯
-    %½ñÈÕ¿ª²ÖµÄºÏÔ¼
-    priceChangeToday = settlePrice - todayDealPrice;
-    priceChangeTodayPerContract = priceChangeToday*contractUnit;
-    todayDealPnL = todayDealVolume*priceChangeTodayPerContract;
-    %×òÈÕ´æĞøµÄºÏÔ¼
-    priceChangeLastDayPerContract = settlePrice*contractUnit - lastDayEndSettlePrice*contractUnitLastDay;
-    lastDayPnL = lastDayEndPosition*priceChangeLastDayPerContract;
-    % ×Ü±£Ö¤½ğ±ä¶¯
-    PnL = todayDealPnL+lastDayPnL;
-    %% ±£Ö¤½ğ×´Ì¬
-    idx_thisStockMargin = strcmp(Asset.CurrentStock(i), Asset.CurrentMarginStock);
-    totalMarginThisContractBeforeUpdate = Asset.CurrentMargins(idx_thisStockMargin); 
-    %% ±ä¸üÕË»§±£Ö¤½ğ
-    [AvaCash, totalMarginThisContractAfterUpdate] = ChangeAccountBalanceWithPnL...% ¸üĞÂ¿ÉÓÃ±£Ö¤½ğ,ÒÑÓÃ±£Ö¤½ğ
-        (PnL, AvaCash, totalMarginThisContractBeforeUpdate);
-    marginChange = totalMarginThisContractAfterUpdate - totalMarginThisContractBeforeUpdate;
-    
-    Asset.CurrentMargins(idx_thisStockMargin) = totalMarginThisContractAfterUpdate;                
-    FrozenCash = FrozenCash+marginChange;   
     %% ´ß½É±£Ö¤½ğ
     %¼ÆËãÎ¬³Ö±£Ö¤½ğ
     maintainMargin = CalculateMargin(settlePrice,DB.Underlying.Close(I),Strike,contractInfo);
-    totalMaintainMarginThisContract = maintainMargin*abs(Asset.CurrentPosition(i));
+    totalMaintainMarginThisContract = maintainMargin*abs(Asset.CurrentPosition(i))*contractUnit;
+    idx_thisStockMargin = strcmp(Asset.CurrentStock(i), Asset.CurrentMarginStock);
+    currentMarginThisContract = Asset.CurrentMargins(idx_thisStockMargin);
     % ´ß½É±£Ö¤½ğµÄ×´¿ö
-    if totalMaintainMarginThisContract > totalMarginThisContractAfterUpdate % Î¬³Ö±£Ö¤½ğ´óÓÚÒÑÓÃ±£Ö¤½ğ
+    if totalMaintainMarginThisContract > currentMarginThisContract % Î¬³Ö±£Ö¤½ğ´óÓÚÒÑÓÃ±£Ö¤½ğ
         MarginCallCode = [MarginCallCode Asset.CurrentStock(i)];
-        MarginCallAmount = [MarginCallAmount totalMaintainMarginThisContract - totalMarginThisContractAfterUpdate];%´ß½É±£Ö¤½ğµÄÊıÁ¿
+        MarginCallAmount = [MarginCallAmount totalMaintainMarginThisContract - currentMarginThisContract];%´ß½É±£Ö¤½ğµÄÊıÁ¿
     end
 end
 % Çå³ıÒÑ¾­²»´æÔÚµÄ±£Ö¤½ğÓë²ÖÎ»
