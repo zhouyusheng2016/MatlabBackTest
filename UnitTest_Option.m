@@ -108,9 +108,18 @@ end
 % 测试落单限制 28 为首个合约到期K线游标号
 DB.CurrentK = 28;
 Asset = ClearingOption(Asset,DB,Options);
+
 Asset = SettleOptionAsset(Asset,DB,Options);
+cashBefore = Asset.Cash(DB.CurrentK-1);
+cashAfter = Asset.Cash(DB.CurrentK);
 
+pos = cell2mat(Asset.ExpiredContractPosition{DB.CurrentK});
+payoff = cell2mat(Asset.ExpiredContractSettlePrice{DB.CurrentK});
+pnl = sum(pos.*payoff);
 
+fee = sum(Asset.SettlementFee{DB.CurrentK});
+totalMargin = sum(Asset.Margins{DB.CurrentK-1});
+error = cashAfter-(cashBefore+pnl-fee+totalMargin); % error 为0
 
 
 
