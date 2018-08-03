@@ -44,10 +44,8 @@ Asset.FrozenCash = zeros(NT,1);
 Asset.GrossAssets = zeros(NT,1);
 % 初始资金量
 Asset.InitCash = Options.InitCash;
-% 保证金催缴代码
-Asset.MarginCallCodes = cell(NT,1);
 % 保证金催缴数额
-Asset.MarginCallAmounts = cell(NT,1);
+Asset.MarginCall = zeros(NT,1);
 % 持仓至到期合约
 Asset.ExpiredContract = cell(NT,1);
 % 持仓至到期合约数量
