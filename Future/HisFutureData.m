@@ -19,5 +19,6 @@ for i=1:max(size(windcode))
     Data.Volume = Data.Volume(1:I,:);
     Data.Vwap = Data.Vwap(1:I,:);
     Data.Settle = Data.Settle(1:I,:);
+    Data.PreSettle = Data.PreSettle(1:I,:);
     HisDB=setfield(HisDB,structName,Data);
 end
