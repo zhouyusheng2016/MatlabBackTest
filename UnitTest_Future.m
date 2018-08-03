@@ -5,9 +5,9 @@ futrueDicPath = strcat(backtestDicPath,'Future');
 optionDicPath = strcat(backtestDicPath,'Option');
 stockDicPath = strcat(backtestDicPath,'Stock');
 path(path,genpath(backtestDicPath));
-path(path,genpath(futrueDicPath));                 % added 期货path
-path(path,genpath(optionDicPath));                 % added 
-path(path,genpath(stockDicPath));                 % added
+path(path,genpath(futrueDicPath));                                          % added 期货path
+path(path,genpath(optionDicPath));                                          % added 
+path(path,genpath(stockDicPath));                                           % added
 
 %% 开始测试
 % the wind obj
@@ -24,9 +24,9 @@ FOptions.DelayDays = 3; % 交易失败则最大延迟交易天数，超过则放弃交易
 % test code const
 windcodeMultiF = {'IH1807.CFE','IH00.CFE'};
 windcodeSingleF = {'IH1807.CFE'};
-start_time = '2018-05-21';
-end_time = '2018-06-18';
 
+start_time = '2018-06-01';
+end_time = '2018-06-18';
 windCodeMultiKind = {'IH1807.CFE', 'RB1807.SHF','IH00.CFE'};
 
 %% start the testing 
