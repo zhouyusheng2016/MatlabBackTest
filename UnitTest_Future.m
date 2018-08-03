@@ -26,7 +26,7 @@ windcodeMultiF = {'IH1807.CFE','IH00.CFE'};
 windcodeSingleF = {'IH1807.CFE'};
 
 start_time = '2018-06-01';
-end_time = '2018-06-18';
+end_time = '2018-07-31';
 windCodeMultiKind = {'IH1807.CFE', 'RB1807.SHF','IH00.CFE'};
 
 %% start the testing 
@@ -42,7 +42,7 @@ HisDB1 = HisFutureData(DB1,windcodeSingleF,FOptions);
 %% 3. test order
 % 初始化资产池
 Asset = InitFutureAsset(DB,FOptions);
-%DB0.CurrentK = 798;
+
 %真实合约IH
 DB.CurrentK = 1;
 Signal{1}.Volume = 5;
@@ -64,12 +64,23 @@ Signal{3}.Stock = windCodeMultiKind{3};
 Signal{3}.Type = 'Today';
 Data3=getfield(DB,code2structname(Signal{3}.Stock,'F'));
 Asset = OrderFuture(DB,Asset,Signal{3}.Stock,Signal{3}.Volume,Data3.Open(DB.CurrentK),Signal{3}.Type,FOptions); % 落单
-Asset = OrderFuture(DB,Asset,Signal{3}.Stock,-Signal{3}.Volume+2,Data3.Open(DB.CurrentK+1),'Next',FOptions); % 落单
+Asset = OrderFuture(DB,Asset,Signal{3}.Stock,2,Data3.Open(DB.CurrentK+1),'Next',FOptions); % 落单
+
 %% 4. test clearing
 %第一天
 DB.CurrentK = 1;
 Asset = ClearingFuture(Asset,DB,FOptions);
-Asset = SettleFutrueAsset(Asset,DB,FOptions);
+vol = Asset.DealVolume{DB.CurrentK};
+price = Asset.DealPrice{DB.CurrentK};
+contractUnit = [Data1.Info{8}, Data2.Info{8},Data3.Info{8}];
+imaigin = [Data1.Info{4}, Data2.Info{4},Data3.Info{4}]/100;
+cost = price.*contractUnit.*imaigin;
+margins_cal = sum(abs(vol).* cost);
+margin = sum(Asset.Margins{DB.CurrentK});
+fee = sum(Asset.DealFee{DB.CurrentK});
+error = Asset.Cash(DB.CurrentK) - (Asset.InitCash - margin -fee);           %error非常小，结算单个合约时不出现
+Asset = SettleFutureAsset(Asset,DB,FOptions);
+% 
 % here should be a intraday settlement, which alters the margins
 % and issuing margin calls if needed. But for simplicity, just think they
 % are settled since we can consider the result are settled once in trading
@@ -77,12 +88,18 @@ Asset = SettleFutrueAsset(Asset,DB,FOptions);
 %第二天
 DB.CurrentK = 2;
 Asset = ClearingFuture(Asset,DB,FOptions);
-Asset = SettleFutrueAsset(Asset,DB,FOptions);
-%第三天
+Asset = SettleFutureAsset(Asset,DB,FOptions);
+%直到到期前一天
 %第三天没有订单撮合，clearing不改变Asset状态， Settlement改变Asset状态
-DB.CurrentK = 3;
+for I = 3:34
+    DB.CurrentK = I;
+    Asset = ClearingFuture(Asset,DB,FOptions);
+    Asset = SettleFutureAsset(Asset,DB,FOptions);
+end
+
+DB.CurrentK = 35;
 Asset = ClearingFuture(Asset,DB,FOptions);
-Asset = SettleFutrueAsset(Asset,DB,FOptions);
+Asset = SettleFutureAsset(Asset,DB,FOptions);
 %% 5. test day end settlement
 
 
