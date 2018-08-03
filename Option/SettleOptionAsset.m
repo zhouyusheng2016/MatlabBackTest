@@ -5,17 +5,18 @@ I = DB.CurrentK;%当日游标
 
 AvaCash = Asset.Cash(I);                                                    %撮合订单后的可用保证金
 FrozenCash = Asset.FrozenCash(I);                                           %撮合订单后的已用保证金总和
-Asset.CurrentStock = Asset.Stock{I};                                              %撮合订单后的持仓证券                          
-Asset.CurrentPosition = Asset.Position{I};                                        %撮合订单后的持仓量对应证券名
+Asset.CurrentStock = Asset.Stock{I};                                        %撮合订单后的持仓证券                          
+Asset.CurrentPosition = Asset.Position{I};                                  %撮合订单后的持仓量对应证券名
 Asset.CurrentMarginStock = Asset.MarginStock{I};
-Asset.CurrentMargins = Asset.Margins{I};                                          %撮合订单后的持仓保证金对应证券名   
+Asset.CurrentMargins = Asset.Margins{I};                                    %撮合订单后的持仓保证金对应证券名   
 
-MarginCallCode = {};                                                        %催缴保证金的合约代码
-MarginCallAmount = [];                                                      %催缴保证金的数量
 ExpiredContract = {};                                                       %到期合约代码
 ExpiredContractPosition = {};                                               %到期合约数量
 ExpiredContractSettlePrice ={};                                             %到期合约价格    
-today = DB.Times(I);                                                      %结算当日日期
+today = DB.Times(I);                                                        %结算当日日期
+
+maintainMargin = 0;    
+MaginCall = 0;
 for i = 1:length(Asset.CurrentStock)
     %% 合约信息
     Data=getfield(DB,code2structname(Asset.CurrentStock{i},'O')); 
@@ -68,18 +69,18 @@ for i = 1:length(Asset.CurrentStock)
     else
         error('SettleOptionAsset.m: Undefined Settle Price')
     end
-    %% 催缴保证金
     %计算维持保证金
     maintainMargin = CalculateMargin(settlePrice,DB.Underlying.Close(I),Strike,contractInfo);
     totalMaintainMarginThisContract = maintainMargin*abs(Asset.CurrentPosition(i))*contractUnit;
-    idx_thisStockMargin = strcmp(Asset.CurrentStock(i), Asset.CurrentMarginStock);
-    currentMarginThisContract = Asset.CurrentMargins(idx_thisStockMargin);
-    % 催缴保证金的状况
-    if totalMaintainMarginThisContract > currentMarginThisContract % 维持保证金大于已用保证金
-        MarginCallCode = [MarginCallCode Asset.CurrentStock(i)];
-        MarginCallAmount = [MarginCallAmount totalMaintainMarginThisContract - currentMarginThisContract];%催缴保证金的数量
-    end
+    %计算义务仓总维持保证金
+    maintainMargin = maintainMargin+totalMaintainMarginThisContract;
 end
+%% 催缴保证金
+accountMargin = AvaCash + sum(Asset.CurrentMargins);
+if maintainMargin > accountMargin % 维持保证金大于已用保证金
+    MaginCall = maintainMargin-accountMargin;    
+end
+
 % 清除已经不存在的保证金与仓位
 idxClearEmpty = Asset.CurrentPosition == 0;
 Asset.CurrentStock(idxClearEmpty) = [];
@@ -99,8 +100,7 @@ Asset.Stock{I} = Asset.CurrentStock;
 Asset.Position{I} = Asset.CurrentPosition;                                           
 
 %保证金催缴记录更新
-Asset.MarginCallCodes{I} = MarginCallCode;
-Asset.MarginCallAmounts{I} = MarginCallAmount;
+Asset.MarginCall(I)=MaginCall;
 % 更新到期合约信息
 Asset.ExpiredContract{I}=ExpiredContract;
 Asset.ExpiredContractPosition{I}=ExpiredContractPosition;
