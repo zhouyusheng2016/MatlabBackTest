@@ -18,7 +18,7 @@ end
 % 期货基本信息
 [w_wsd_data_2,~,w_wsd_fields_2,w_wsd_times_2,w_wsd_errorid_2,w_wsd_reqid_2]= ...
     w.wsd(windcode,'lasttrade_date,lastdelivery_date,dlmonth,margin,punit,changelt,mfprice,contractmultiplier,ftmargins',...
-    start_time,start_time,'industryType=1','PriceAdj=F');
+    start_time,end_time,'industryType=1','PriceAdj=F');
 if w_wsd_errorid_2~=0
     disp(['!!! 加载' windcode '基本信息数据错误: ' w_wsd_data_2{1} ' Code: ' num2str(w_wsd_errorid_2) ' !!!']);
     flag=0;
@@ -29,7 +29,7 @@ end
 DB.Type = 'F';
 DB.Code = windcode;
 DB.isRealContract = isRealContract;
-DB.Info = w_wsd_data_2;%最后交易日,最后交割日,交割月份,保证金比例,单位,涨跌限制,最小变动价位,合约乘数,最初交易保证金
+DB.Info = w_wsd_data_2(end,:);%最后交易日,最后交割日,交割月份,保证金比例,单位,涨跌限制,最小变动价位,合约乘数,最初交易保证金
 if isnan(DB.Info{8}) && length(DB.Code)==8
     DB.Info{8} = 300;
     sprintf('期货连续合约合约乘数不存在：已自动填写为 300')
