@@ -34,7 +34,7 @@ for i = 1:length(Asset.CurrentStock)
     contractInfo = GetFutureContractInfo(Data);                             %合约信息
     %% 结算信息
     settlePrice = Data.Settle(I);       
-    if lastTradeDateNum> today
+    if lastTradeDateNum <today
        error('SettleFutureAsset.m: contract passed last trade date') 
     end
     flag_AtExpiration = lastTradeDateNum==today;
