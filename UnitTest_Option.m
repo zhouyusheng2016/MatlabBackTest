@@ -26,7 +26,7 @@ w = windmatlab();
 % this could take a while
 start_time = '2015-02-09';
 end_time = '2018-04-30';
-[DB flag] = LoadOptionData_Local(w, dataPath,start_time,end_time,'510050.SH',Options);
+[DB flag] = LoadOptionData_Local(w, filename,start_time,end_time,'510050.SH',Options);
 
 %获取代码
 fields = fieldnames(DB);
@@ -108,8 +108,8 @@ end
 % 测试落单限制 28 为首个合约到期K线游标号
 DB.CurrentK = 28;
 Asset = ClearingOption(Asset,DB,Options);
-
 Asset = SettleOptionAsset(Asset,DB,Options);
+
 cashBefore = Asset.Cash(DB.CurrentK-1);
 cashAfter = Asset.Cash(DB.CurrentK);
 
