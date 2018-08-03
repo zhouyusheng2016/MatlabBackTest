@@ -2,6 +2,7 @@ function Asset = SettleFutureAsset(Asset,DB,Options)
 % 用于每日结算期货保证金变化
 % 用于每日clearing 结束后
 I = DB.CurrentK;%当日游标
+
 %昨日状态
 if I == 1
     PreStock = [];
@@ -15,9 +16,9 @@ end
 
 AvaCash = Asset.Cash(I);                                                    %撮合订单后的可用保证金
 FrozenCash = Asset.FrozenCash(I);                                           %撮合订单后的已用保证金总和
-Asset.CurrentStock = Asset.Stock{I};                                                  %撮合订单后的持仓证券                          
-Asset.CurrentPosition = Asset.Position{I};                                            %撮合订单后的持仓量对应证券名
-Asset.CurrentMargins = Asset.Margins{I};                                              %撮合订单后的持仓保证金对应证券名   
+Asset.CurrentStock = Asset.Stock{I};                                        %撮合订单后的持仓证券                          
+Asset.CurrentPosition = Asset.Position{I};                                  %撮合订单后的持仓量对应证券名
+Asset.CurrentMargins = Asset.Margins{I};                                    %撮合订单后的持仓保证金对应证券名   
 
 MarginCallCode = {};                                                        %催缴保证金的合约代码
 MarginCallAmount = [];                                                      %催缴保证金的数量
@@ -40,7 +41,7 @@ for i = 1:length(Asset.CurrentStock)
     %% 合约到期的情况
     if flag_AtExpiration
         sprintf(strcat('Bar:', num2str(I), ' Date:', DB.TimesStr(I,:), ' Contract: ', Data.Code, ' Reached Expiration' ))
-        FrozenCash = FrozenCash - Asset.CurrentMargins(i);                        %释放冻结资金
+        FrozenCash = FrozenCash - Asset.CurrentMargins(i);                 %释放冻结资金
         AvaCash = AvaCash + Asset.CurrentMargins(i);  
         fee = FutureTradeCommission(settlePrice, Asset.CurrentPosition(i), contractInfo, Options,'Open');% 目前不分开平都填写Open
         AvaCash = AvaCash - fee;
@@ -85,17 +86,17 @@ for i = 1:length(Asset.CurrentStock)
     %% 结算总资金变动
     thisPositionPnL = pnl_deal+pnl_last;
     
-    totalMarginThisContractBeforeUpdate = Asset.CurrentMargins(i);                % 成交前保证金状态
+    totalMarginThisContractBeforeUpdate = Asset.CurrentMargins(i);          % 成交前保证金状态
     
     [AvaCash, totalMarginThisContractAfterUpdate] = ChangeAccountBalanceWithPnL...% 更新可用保证金,已用保证金
         (thisPositionPnL, AvaCash, totalMarginThisContractBeforeUpdate);
     thisMarginChange = totalMarginThisContractAfterUpdate - totalMarginThisContractBeforeUpdate;%此仓位已用保证金变化量
     
-    Asset.CurrentMargins(i) = totalMarginThisContractAfterUpdate;                 %更新至交易时账户的已用保证金数量
+    Asset.CurrentMargins(i) = totalMarginThisContractAfterUpdate;           %更新至交易时账户的已用保证金数量
     FrozenCash = FrozenCash+thisMarginChange;                               %更新至交易时总已用保证金数量
     %% 催缴保证金
     thisContractMaintainMargin = CalculateMaintainMargin(Asset.CurrentPosition(i),contractInfo,settlePrice);% 维持保证金
-    if totalMarginThisContractAfterUpdate < thisContractMaintainMargin%如小于维持保证金
+    if totalMarginThisContractAfterUpdate < thisContractMaintainMargin      %如小于维持保证金
         %催缴保证金
         MarginCallCode = [MarginCallCode Asset.CurrentStock(i)];
         MarginCallAmount = [MarginCallAmount thisContractMaintainMargin - totalMarginThisContractAfterUpdate];%催缴保证金的数量
