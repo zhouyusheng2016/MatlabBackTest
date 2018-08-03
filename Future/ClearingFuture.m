@@ -65,26 +65,6 @@ for i = 1:length(Asset.OrderPrice{I})
     if dealvolume~=0
         %% 自此之下不应该出现总交易量 dealvolume
         %% 撮合平仓,先平仓再开仓
-        %撮合前调整账户信息至撮合时  
-        flag_settled = false;
-        if  thisStockCurrentPosition ~= 0
-            lastSettlePrice = Data.Settle(I-1);                             % 上次清算价格,为平仓操作意味着存在I-1的价格
-            priceChange = dealprice - lastSettlePrice;                      % 平仓时价格与上次结算价的差值
-            priceChangePerContract = priceChange*contractInfo.multiplier;   % 每张合约的价值变化
-            thisPositionPnL = thisStockCurrentPosition*priceChangePerContract; %此合约品种上从上次清算到现在的盈亏
-            totalMarginThisContractBeforeUpdate = Asset.CurrentMargins(idxThisStockInCurrentStock); % 成交前保证金状态
-            
-            [AvaCash, totalMarginThisContractAfterUpdate] = ChangeAccountBalanceWithPnL...% 更新可用保证金,已用保证金
-                (thisPositionPnL, AvaCash, totalMarginThisContractBeforeUpdate);
-            thisMarginChange = totalMarginThisContractAfterUpdate - totalMarginThisContractBeforeUpdate;%此仓位已用保证金变化量
-            Asset.CurrentMargins(idxThisStockInCurrentStock) = totalMarginThisContractAfterUpdate; %更新至交易时账户的已用保证金数量
-            FrozenCash = FrozenCash+thisMarginChange;                           %更新至交易时总已用保证金数量
-            
-            % 调整合约的结算价格记录--最后未真实成交但是已经结算的情况
-            Asset.SettleCode{I} = [Asset.SettleCode{I} Asset.OrderStock{I}(i)]; %交易价格结算过的证券代码
-            Asset.Settle{I} = [Asset.Settle{I} dealprice];                  %结算的交易价格
-            flag_settled = true;
-        end
         %交易发生
         dealfee.Open = 0;
         dealfee.Close = 0;
@@ -134,11 +114,6 @@ for i = 1:length(Asset.OrderPrice{I})
                 Asset.CurrentStock = [Asset.CurrentStock Asset.OrderStock{I}(i)];
                 Asset.CurrentPosition = [Asset.CurrentPosition realDealVol];
                 Asset.CurrentMargins = [Asset.CurrentMargins marginChange];
-            end
-            if ~flag_settled
-                % 调整合约的结算价格记录--开新仓的情况
-                Asset.SettleCode{I} = [Asset.SettleCode{I} Asset.OrderStock{I}(i)]; %交易价格结算过的证券代码
-                Asset.Settle{I} = [Asset.Settle{I} dealprice];                  %结算的交易价格
             end
         end
     end
