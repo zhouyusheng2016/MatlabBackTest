@@ -45,23 +45,21 @@ DB.CurrentK = 1;
 Signal{1}.Volume = 5;
 Signal{1}.Stock = optionFieldnames{1}(4:end);
 Signal{1}.Type = 'Today';
-Data = getfield(DB, optionFieldnames{1});
-Asset = OrderOption(DB,Asset,Signal{1}.Stock, Signal{1}.Volume,Data.Open(1),Signal{1}.Type,Options);
-Asset = OrderOption(DB,Asset,Signal{1}.Stock, -Signal{1}.Volume-1,Data.Open(2),'Next',Options);
-
+Data1 = getfield(DB, optionFieldnames{1});
+Asset = OrderOption(DB,Asset,Signal{1}.Stock, Signal{1}.Volume,Data1.Open(1),Signal{1}.Type,Options);
+Asset = OrderOption(DB,Asset,Signal{1}.Stock, -Signal{1}.Volume-1,Data1.Open(2),'Next',Options);
 Signal{2}.Volume = -7;
 Signal{2}.Stock = optionFieldnames{2}(4:end);
 Signal{2}.Type = 'Today';
-Data = getfield(DB, optionFieldnames{2});
-Asset = OrderOption(DB,Asset,Signal{2}.Stock,Signal{2}.Volume,Data.Open(1),Signal{2}.Type,Options);
-Asset = OrderOption(DB,Asset,Signal{2}.Stock,-Signal{2}.Volume+1,Data.Open(2),'Next',Options);
-
+Data2 = getfield(DB, optionFieldnames{2});
+Asset = OrderOption(DB,Asset,Signal{2}.Stock,Signal{2}.Volume,Data2.Open(1),Signal{2}.Type,Options);
+Asset = OrderOption(DB,Asset,Signal{2}.Stock,-Signal{2}.Volume+1,Data2.Open(2),'Next',Options);
 Signal{3}.Volume = -8;
-Signal{3}.Stock = optionFieldnames{3}(4:end);
+Signal{3}.Stock = optionFieldnames{10}(4:end);
 Signal{3}.Type = 'Today';
-Data = getfield(DB, optionFieldnames{3});
-Asset = OrderOption(DB,Asset,Signal{3}.Stock,Signal{3}.Volume,Data.Open(1),Signal{3}.Type,Options);
-Asset = OrderOption(DB,Asset,Signal{3}.Stock,Signal{3}.Volume,Data.Open(2),'Next',Options);
+Data3 = getfield(DB, optionFieldnames{10});                                  % put
+Asset = OrderOption(DB,Asset,Signal{3}.Stock,Signal{3}.Volume,Data3.Open(1),Signal{3}.Type,Options);
+Asset = OrderOption(DB,Asset,Signal{3}.Stock,Signal{3}.Volume,Data3.Open(2),'Next',Options);
 
 
 %% ¥È∫œ”ÎΩ·À„
@@ -81,8 +79,6 @@ error = Asset.Cash(DB.CurrentK) - after;                                    %¥ÌŒ
 
 % √ø»’∂¢≈Ã
 Asset = SettleOptionAsset(Asset,DB,Options);
-
-
 % ∆Ω∂‡∑¥ ÷£¨∆Ωø’∑¥ ÷£¨ø’≤÷–¬ø™ø’≤÷
 DB.CurrentK = 2;
 Asset = ClearingOption(Asset,DB,Options);
@@ -120,6 +116,46 @@ pnl = sum(pos.*payoff);
 fee = sum(Asset.SettlementFee{DB.CurrentK});
 totalMargin = sum(Asset.Margins{DB.CurrentK-1});
 error = cashAfter-(cashBefore+pnl-fee+totalMargin); % error Œ™0
+%% ≤‚ ‘æª÷µ∫ÀÀ„
+for I = 1:28
+DB.CurrentK  = I;
+Asset = ClearingOption(Asset,DB,Options);
+Asset = SettleOptionAsset(Asset,DB,Options);
+Asset = RecordOptionAssetValueAtBarClose(Asset,DB,I,Options);
+end
+
+underlyingClose = DB.Underlying.Close(I);
+strikes = [Data1.Strike(I), Data2.Strike(I), Data3.Strike(I)];
+multi = [Data1.ContractUnit(I), Data2.ContractUnit(I), Data3.ContractUnit(I)];
+[Data1.Info{1} Data2.Info{1} Data3.Info{1}]
+payoff(1:2) = max(underlyingClose - strikes(1:2),0);
+payoff(3) = max(strikes(3)- underlyingClose, 0);
+payoffPos = payoff.*multi;
+
+payoffPos == cell2mat(Asset.ExpiredContractSettlePrice{I})
+%% ≤‚ ‘—∞’“√ø»’ø…Ωª“◊∫œ‘º
+tic
+tradeableOptNames = GetTradeableOptions(DB, I, optionFieldnames);
+toc % 0.02√Î“ª¥Œ≤È—Ø
+
+%% ≤‚ ‘≤È—Ø√ø»’∆Ω÷µ∫œ‘º
+% ≤…”√ø…Ωª“◊∫œ‘º√˚◊˜Œ™ ‰»Î¡ø
+tic
+optInfo = GetStrikeAscendingOptionInfo(DB, I, tradeableOptNames);
+toc % 0.03s/103contracts
+
+%≤‚ ‘√øÃÏ≤È—Ø
+tic
+all = [];
+for I = 1:DB.NK
+    tradeableOptNames = GetTradeableOptions(DB, I, optionFieldnames);
+    optInfo = GetStrikeAscendingOptionInfo(DB, I, tradeableOptNames);
+    all = [all;optInfo];
+end
+toc% 784ÃÏ20s
+%% 
+ 
+
 
 
 
