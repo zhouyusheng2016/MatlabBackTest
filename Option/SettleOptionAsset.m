@@ -72,6 +72,16 @@ for i = 1:length(Asset.CurrentStock)
     %计算维持保证金
     maintainMargin = CalculateMargin(settlePrice,DB.Underlying.Close(I),Strike,contractInfo);
     totalMaintainMarginThisContract = maintainMargin*abs(Asset.CurrentPosition(i))*contractUnit;
+    %目前账户已用保证金余额
+    idx_thisStockMargin = strcmp(Asset.CurrentStock(i), Asset.CurrentMarginStock);
+    totalMarginThisContractNow = Asset.CurrentMargins(idx_thisStockMargin);
+    % 可用保证金变化
+    marginChange = totalMaintainMarginThisContract - totalMarginThisContractNow;
+    %% 每日盯市使可用保证金 已用保证金变化
+    % 更新已用保证金可用保证金
+    AvaCash = AvaCash - marginChange;
+    FrozenCash = FrozenCash + marginChange;
+    Asset.CurrentMargins(idx_thisStockMargin) = totalMaintainMarginThisContract;
     %计算义务仓总维持保证金
     maintainMargin = maintainMargin+totalMaintainMarginThisContract;
 end
