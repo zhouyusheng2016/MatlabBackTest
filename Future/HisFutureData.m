@@ -3,6 +3,7 @@ I = DB.CurrentK;
 HisDB = DB;
 HisDB.Times = HisDB.Times(1:I,:);
 HisDB.TimesStr = HisDB.TimesStr(1:I,:);
+HisDB.NK = length(HisDB.Times);
 for i=1:max(size(windcode))
     stock = windcode{i};
     structName = code2structname(stock,'F');
