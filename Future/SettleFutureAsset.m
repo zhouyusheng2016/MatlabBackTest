@@ -20,13 +20,11 @@ Asset.CurrentStock = Asset.Stock{I};                                        %´éº
 Asset.CurrentPosition = Asset.Position{I};                                  %´éºÏ¶©µ¥ºóµÄ³Ö²ÖÁ¿¶ÔÓ¦Ö¤È¯Ãû
 Asset.CurrentMargins = Asset.Margins{I};                                    %´éºÏ¶©µ¥ºóµÄ³Ö²Ö±£Ö¤½ð¶ÔÓ¦Ö¤È¯Ãû   
 
-MarginCall = 0;
 ExpiredContract = {};                                                       %µ½ÆÚºÏÔ¼´úÂë
 ExpiredContractPosition = {};                                               %µ½ÆÚºÏÔ¼ÊýÁ¿
 ExpiredContractSettlePrice ={};                                             %µ½ÆÚºÏÔ¼¼Û¸ñ
 
 today = DB.Times(I);
-maintainMargin = 0;
 for i = 1:length(Asset.CurrentStock)
     Data=getfield(DB,code2structname(Asset.CurrentStock{i},'F'));           %ºÏÔ¼ÐÐÇé
     lastTradeDateTime = datetime(Data.Info{1});                             %ºÏÔ¼×îºó½»Ò×ÈÕ -- Á¬ÐøºÏÔ¼µÄ×îºó½»Ò×ÈÕÓ¦¸ÃÊÇµ±Ç°ºÏÔ¼µÄ×îºó½»Ò×ÈÕ£¨ÍòµÂÊý¾Ý¹æÔò£©
@@ -83,7 +81,7 @@ for i = 1:length(Asset.CurrentStock)
     valueChange_last = settlePrice - lastDaySettlePrice;
     valueChangePerContract_last = valueChange_last*contractInfo.multiplier;
     pnl_last = valueChangePerContract_last*lastDayContiPos;                 % ×òÈÕÎ´±»½ñÆ½µÄ²¿·Ö
-    %% ½áËã×Ü×Ê½ð±ä¶¯
+    %% ½áËã¼ÛÓ¯¿÷ÒýÆðµÄ×Ü×Ê½ð±ä¶¯
     thisPositionPnL = pnl_deal+pnl_last;
     
     totalMarginThisContractBeforeUpdate = Asset.CurrentMargins(i);          % ³É½»Ç°±£Ö¤½ð×´Ì¬
@@ -94,19 +92,18 @@ for i = 1:length(Asset.CurrentStock)
     
     Asset.CurrentMargins(i) = totalMarginThisContractAfterUpdate;           %¸üÐÂÖÁ½»Ò×Ê±ÕË»§µÄÒÑÓÃ±£Ö¤½ðÊýÁ¿
     FrozenCash = FrozenCash+thisMarginChange;                               %¸üÐÂÖÁ½»Ò×Ê±×ÜÒÑÓÃ±£Ö¤½ðÊýÁ¿
+    
+    %% Î¬³Ö±£Ö¤½ð±ä»¯ÒýÆðµÄ×Ê½ð±ä¶¯
     %Î¬³Ö±£Ö¤½ð
     thisContractMaintainMargin = CalculateMaintainMargin(Asset.CurrentPosition(i),contractInfo,settlePrice);% Î¬³Ö±£Ö¤½ð
-    %×ÜÎ¬³Ö±£Ö¤½ð
-    maintainMargin = maintainMargin + thisContractMaintainMargin;
+    % Ã¿¸öºÏÔ¼µÄ±£Ö¤¼°n
+    %% ´ß½É±£Ö¤½ð
+    if thisContractMaintainMargin> Asset.CurrentMargins(i)
+        marginCallThisContract = thisContractMaintainMargin - Asset.CurrentMargins(i);
+        Asset.MarginCallStock{I} =[Asset.MarginCallStock{I} Asset.CurrentStock(i)];
+        Asset.MarginCallAmount{I} = [Asset.MarginCallAmount{I} marginCallThisContract];
+    end
 end
-%% ´ß½É±£Ö¤½ð
-%ÕË»§±£Ö¤½ð
-accountMargins = AvaCash + sum(Asset.CurrentMargins);
-if accountMargins < maintainMargin      %ÈçÐ¡ÓÚÎ¬³Ö±£Ö¤½ð
-    %´ß½É±£Ö¤½ð
-    MarginCall =maintainMargin-accountMargins;%´ß½É±£Ö¤½ðµÄÊýÁ¿
-end
-
 %Èç¹û½»Ò×ºóµ¼ÖÂ²¿·ÖºÏÔ¼¿Õ²Ö£¬ÔÚµ±Ç°³Ö²ÖÖÐÇå³ý¿Õ²ÖµÄºÏÔ¼
 idxClearEmpty = Asset.CurrentPosition == 0;
 Asset.CurrentStock(idxClearEmpty) = [];
@@ -120,8 +117,6 @@ Asset.Margins{I} = Asset.CurrentMargins;
 Asset.Stock{I} = Asset.CurrentStock;                                                                          
 Asset.Position{I} = Asset.CurrentPosition;                                           
 
-%±£Ö¤½ð´ß½É¼ÇÂ¼¸üÐÂ
-Asset.MarginCall(I) = MarginCall;
 % ¸üÐÂµ½ÆÚºÏÔ¼ÐÅÏ¢
 Asset.ExpiredContract{I}=ExpiredContract;
 Asset.ExpiredContractPosition{I}=ExpiredContractPosition;
