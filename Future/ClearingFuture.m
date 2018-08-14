@@ -71,6 +71,22 @@ for i = 1:length(Asset.OrderPrice{I})
         unfrozeCash = 0;
         frozeCash = 0;
         if tradeVolume.Close~=0
+            % 自昨日的盈亏
+            lastSettlePrice = Data.PreSettle(I);                             
+            priceChange = dealprice - lastSettlePrice;                      
+            priceChangePerContract = priceChange*contractInfo.multiplier;   %每张合约的盈亏
+            thisPositionPnL = -tradeVolume.Close*priceChangePerContract;    %平仓仓位的盈亏，未平仓的不按照交易价格结算
+            % 平仓前账户的已用保证金余额
+            totalMarginThisContractBeforeUpdate = Asset.CurrentMargins(idxThisStockInCurrentStock); 
+            % 将平仓仓位的盈亏计入资产
+            [AvaCash, totalMarginThisContractAfterUpdate] = ChangeAccountBalanceWithPnL...
+                (thisPositionPnL, AvaCash, totalMarginThisContractBeforeUpdate);
+            % 计入盈亏后已用保证金月 - 前已用保证金
+            thisMarginChange = totalMarginThisContractAfterUpdate - totalMarginThisContractBeforeUpdate;
+            %
+            Asset.CurrentMargins(idxThisStockInCurrentStock) = totalMarginThisContractAfterUpdate;
+            FrozenCash = FrozenCash+thisMarginChange;
+            
             % 释放保证金
             releaseMarginByPercentage = -tradeVolume.Close/thisStockCurrentPosition;%计算释放保证金的比例
             unfrozeCash = releaseMarginByPercentage*Asset.CurrentMargins(idxThisStockInCurrentStock);%计算释放保证金的数额
