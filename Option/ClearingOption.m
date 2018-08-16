@@ -90,9 +90,10 @@ for i = 1:length(Asset.OrderPrice{I})
                 tradeVolume.Close = AdaptCloseShortVolumeToAvaCash(Data, I,...
                     tradeVolume.Close, AvaCash,dealprice, contractUnit, ...
                     marginReleaseByOneContract, Options);
+                releaseRatio = abs(tradeVolume.Close/thisStockCurrentPosition);
                 costOfDeal = tradeVolume.Close *dealprice * contractUnit;
                 dealfee.Close = tradeVolume.Close*Options.CommissionPerContract;        
-                unfrozeCash = tradeVolume.Close*marginReleaseByOneContract;
+                unfrozeCash = releaseRatio*thisStockCurrentMargin;
                 % 释放保证金
                 Asset.CurrentMargins(idx_margin) = Asset.CurrentMargins(idx_margin) - unfrozeCash;      
             end
