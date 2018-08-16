@@ -7,6 +7,12 @@ if I == 1
     return
 end
 
+% 如本合约不存在前交易状态
+if Data.Trade_status(I-1) ==0
+    price = Data.Open(I);
+    return
+end
+
 switch type
     case 'Close'
         price = Data.Close(I-1);
