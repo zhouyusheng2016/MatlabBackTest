@@ -21,8 +21,12 @@ for k=0:Options.DelayDays % 交易失败则延迟交易
         cond_(1,1) = ~isnan(Data.Open(I+OrderDay+k));
         cond_(1,2) = ~isnan(Data.High(I+OrderDay+k));
         cond_(1,3) = ~isnan(Data.Low(I+OrderDay+k));
-        cond_(1,4) = ~isnan(Data.Close(I+OrderDay+k));
+        cond_(1,4) = ~isnan(Data.Close(I+OrderDay+k));                              
         cond(1) = sum(cond_)==4;                                            %今日数据存在
+        % 
+        %
+        %自动前复权问题带修正此处
+        %
         cond(2) = -9.9<=Data.Pct_chg{I+OrderDay+k};                         %根据收盘价确定涨停存在问题 %跌停限制
         cond(3) = Data.Pct_chg{I+OrderDay+k}<=9.9;                          %根据收盘价确定跌停存在问题 %涨停限制
         %合约存续

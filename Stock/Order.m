@@ -19,7 +19,11 @@ Data=getfield(DB,code2structname(stock,'S'));
 for k=0:Options.DelayDays % 交易失败则延迟交易
     if I+OrderDay+k <= DB.NK
         cond(1) = true;%strcmp(Data.Sec_status{I+OrderDay+k},'L')==1;      %由于万德存续状态根据未来数据确定
-        cond(2) = strcmp(Data.Trade_status{I+OrderDay+k},'交易')==1;        %交易状态 
+        cond(2) = strcmp(Data.Trade_status{I+OrderDay+k},'交易')==1;        %交易状态
+        % 
+        %
+        %自动前复权问题带修正此处
+        %
         cond(3) = -9.9<=Data.Pct_chg{I+OrderDay+k};                         %根据收盘价确定涨停存在问题 %跌停限制
         cond(4) = Data.Pct_chg{I+OrderDay+k}<=9.9;                          %根据收盘价确定跌停存在问题 %涨停限制
         if cond(1) && cond(2) && cond(3) && cond(4)
