@@ -1,7 +1,7 @@
 function [DB flag] = LoadFutureData(w,windcode,start_time,end_time,isRealContract,Options)
 % 期货行情数据
 [w_wsd_data_0,w_wsd_codes_0,w_wsd_fields_0,w_wsd_times_0,w_wsd_errorid_0,w_wsd_reqid_0]= ...
-    w.wsd(windcode,'open,high,low,close,volume,vwap,settle,pre_settle',start_time,end_time,'PriceAdj=F');
+    w.wsd(windcode,'open,high,low,close,volume,vwap,settle,pre_settle,adjfactor',start_time,end_time);
 if w_wsd_errorid_0~=0
     disp(['!!! 加载' windcode '行情数据错误: ' w_wsd_data_0{1} ' Code: ' num2str(w_wsd_errorid_0) ' !!!']);
     flag=0;
@@ -9,7 +9,7 @@ if w_wsd_errorid_0~=0
 end
 % 期货交易信息
 [w_wsd_data_1,~,w_wsd_fields_1,w_wsd_times_1,w_wsd_errorid_1,w_wsd_reqid_1]= ...
-    w.wsd(windcode,'sec_status,pct_chg,chg',start_time,end_time,'PriceAdj=F');
+    w.wsd(windcode,'sec_status,pct_chg,chg',start_time,end_time);
 if w_wsd_errorid_1~=0
     disp(['!!! 加载' windcode '交易信息数据错误: ' w_wsd_data_1{1} ' Code: ' num2str(w_wsd_errorid_1) ' !!!']);
     flag=0;
@@ -18,7 +18,7 @@ end
 % 期货基本信息
 [w_wsd_data_2,~,w_wsd_fields_2,w_wsd_times_2,w_wsd_errorid_2,w_wsd_reqid_2]= ...
     w.wsd(windcode,'lasttrade_date,lastdelivery_date,dlmonth,margin,punit,changelt,mfprice,contractmultiplier,ftmargins',...
-    start_time,end_time,'industryType=1','PriceAdj=F');
+    start_time,end_time,'industryType=1');
 if w_wsd_errorid_2~=0
     disp(['!!! 加载' windcode '基本信息数据错误: ' w_wsd_data_2{1} ' Code: ' num2str(w_wsd_errorid_2) ' !!!']);
     flag=0;
@@ -49,6 +49,7 @@ DB.Volume = w_wsd_data_0(:,5);%量
 DB.Vwap = w_wsd_data_0(:,6);%vwap
 DB.Settle = w_wsd_data_0(:,7);%结算价
 DB.PreSettle = w_wsd_data_0(:,8);%前结算价
+DB.AdjFactor = w_wsd_data_0(:,9);%赋权因子 
 DB.NK = length(DB.Open);%行情数据量
 % 数据清洗
 %数据加载成功
