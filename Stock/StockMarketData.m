@@ -25,13 +25,17 @@ if iscell(windcode)
 end
 % 加载回测基准行情数据
 [w_wsd_data_0,w_wsd_codes_0,w_wsd_fields_0,w_wsd_times_0,w_wsd_errorid_0,w_wsd_reqid_0]= ...
-    w.wsd(Options.Benchmark,'close',start_time,end_time,'PriceAdj=F');
+    w.wsd(Options.Benchmark,'open, high, low, close,adjfactor',start_time,end_time);
 if w_wsd_errorid_0~=0
     disp(['!!! 加载' Options.Benchmark '行情数据错误: ' w_wsd_data_0{1} ' Code: ' num2str(w_wsd_errorid_0) ' !!!']);
     return;
 end
 
-DB.Benchmark = w_wsd_data_0;
+DB.Benchmark.Open = w_wsd_data_0(:,1);
+DB.Benchmark.High = w_wsd_data_0(:,2);
+DB.Benchmark.Low = w_wsd_data_0(:,3);
+DB.Benchmark.Close = w_wsd_data_0(:,4);
+DB.Benchmark.AdjFactor = w_wsd_data_0(:,5);
 DB.BenchmarkStock = Options.Benchmark;
 % 时间轴
 DB.Times = Data.Times;

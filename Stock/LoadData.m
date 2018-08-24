@@ -2,7 +2,7 @@ function [DB flag] = LoadData(w,windcode,start_time,end_time,Options)
 
 % 行情数据
 [w_wsd_data_0,w_wsd_codes_0,w_wsd_fields_0,w_wsd_times_0,w_wsd_errorid_0,w_wsd_reqid_0]= ...
-    w.wsd(windcode,'open,high,low,close,volume,vwap',start_time,end_time,'PriceAdj=F');
+    w.wsd(windcode,'open,high,low,close,volume,vwap,adjfactor',start_time,end_time);
 if w_wsd_errorid_0~=0
     disp(['!!! 加载' windcode '行情数据错误: ' w_wsd_data_0{1} ' Code: ' num2str(w_wsd_errorid_0) ' !!!']);
     flag=0;
@@ -10,7 +10,7 @@ if w_wsd_errorid_0~=0
 end
 % 证券交易信息
 [w_wsd_data_1,w_wsd_codes_1,w_wsd_fields_1,w_wsd_times_1,w_wsd_errorid_1,w_wsd_reqid_1]= ...
-    w.wsd(windcode,'sec_status,trade_status,pct_chg',start_time,end_time,'PriceAdj=F');
+    w.wsd(windcode,'sec_status,trade_status,pct_chg',start_time,end_time);
 if w_wsd_errorid_1~=0
     disp(['!!! 加载' windcode '交易信息数据错误: ' w_wsd_data_1{1} ' Code: ' num2str(w_wsd_errorid_1) ' !!!']);
     flag=0;
@@ -18,7 +18,7 @@ if w_wsd_errorid_1~=0
 end
 % 证券基本信息
 [w_wsd_data_2,w_wsd_codes_2,w_wsd_fields_2,w_wsd_times_2,w_wsd_errorid_2,w_wsd_reqid_2]= ...
-    w.wsd(windcode,'ipo_date,concept,industry_CSRC12,industry_gics',start_time,start_time,'industryType=1','PriceAdj=F');
+    w.wsd(windcode,'ipo_date,concept,industry_CSRC12,industry_gics',start_time,start_time,'industryType=1');
 if w_wsd_errorid_2~=0
     disp(['!!! 加载' windcode '基本信息数据错误: ' w_wsd_data_2{1} ' Code: ' num2str(w_wsd_errorid_2) ' !!!']);
     flag=0;
@@ -40,6 +40,7 @@ DB.Low = w_wsd_data_0(:,3);%低
 DB.Close = w_wsd_data_0(:,4);%收
 DB.Volume = w_wsd_data_0(:,5);%量
 DB.Vwap = w_wsd_data_0(:,6);%量
+DB.AdjFactor = w_wsd_data_0(:,7);%量
 DB.NK = length(DB.Open);%行情数据量
 % 数据清洗
 
