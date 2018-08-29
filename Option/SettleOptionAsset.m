@@ -14,8 +14,6 @@ ExpiredContract = {};                                                       %µ½Æ
 ExpiredContractPosition = {};                                               %µ½ÆÚºÏÔ¼ÊıÁ¿
 ExpiredContractSettlePrice ={};                                             %µ½ÆÚºÏÔ¼¼Û¸ñ    
 today = DB.Times(I);                                                        %½áËãµ±ÈÕÈÕÆÚ
-
-maintainMargin = 0;    
 MaginCall = 0;
 for i = 1:length(Asset.CurrentStock)
     %% ºÏÔ¼ĞÅÏ¢
@@ -82,13 +80,12 @@ for i = 1:length(Asset.CurrentStock)
     AvaCash = AvaCash - marginChange;
     FrozenCash = FrozenCash + marginChange;
     Asset.CurrentMargins(idx_thisStockMargin) = totalMaintainMarginThisContract;
-    %¼ÆËãÒåÎñ²Ö×ÜÎ¬³Ö±£Ö¤½ğ
-    maintainMargin = maintainMargin+totalMaintainMarginThisContract;
 end
 %% ´ß½É±£Ö¤½ğ
-accountMargin = AvaCash + sum(Asset.CurrentMargins);
-if maintainMargin > accountMargin % Î¬³Ö±£Ö¤½ğ´óÓÚÒÑÓÃ±£Ö¤½ğ
-    MaginCall = maintainMargin-accountMargin;    
+totalMargin = sum(Asset.CurrentMargins);
+accountMargin = AvaCash + totalMargin;
+if totalMargin > accountMargin % Î¬³Ö±£Ö¤½ğ´óÓÚÒÑÓÃ±£Ö¤½ğ
+    MaginCall = totalMargin-accountMargin;    
 end
 
 % Çå³ıÒÑ¾­²»´æÔÚµÄ±£Ö¤½ğÓë²ÖÎ»
