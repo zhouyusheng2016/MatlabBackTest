@@ -1,4 +1,4 @@
-function [ Greeks ] = GetGreeks(Data, I, UnderlyingPriceList, sig, rf, varargin)
+function [ Greeks ] = GetGreeks(Data, I, UnderlyingPriceList, sig, rf, timeAdj,varargin)
 Greeks = struct;
 switch_delta = false;
 switch_gamma = false;
@@ -6,11 +6,11 @@ switch_vega = false;
 switch_theta = false;
 switch_rho = false;
 
-if nargin < 6
+if nargin < 7
     error(message('MatlabBackTest: GetGreeks.m: TooFewInputs'))
 end
 
-if nargin >10
+if nargin >11
     error(message('MatlabBackTest: GetGreeks.m: TooManyInputs'))
 end
 
@@ -33,7 +33,7 @@ end
 
 undelrying = UnderlyingPriceList(I);
 strike = Data.Strike(I);
-t = Data.TimeUntilExpiration(I);
+t = Data.TimeUntilExpiration(I)+timeAdj;
 type = Data.Info{1};
 flag_isCall = type == 'call';
 if switch_delta
