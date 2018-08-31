@@ -243,5 +243,14 @@ Underlying.AdjFactor = w_wsd_data_0(:,8);
 TDB=setfield(TDB,'Underlying',Underlying);
 TDB.CurrentK = 1;
 TDB.NK = length(Underlying.Times);
+% 
+TradeableOptionField = cell(TDB.NK,1);
+fields = fieldnames(TDB);
+OptionFileds = fields(1:end-5);
+for i = 1:TDB.NK 
+    fieldNames = GetTradeableOptions(TDB, i, OptionFileds);
+    TradeableOptionField{i} = fieldNames;
+end
+TDB.TradeableOptionField = TradeableOptionField;
 %数据加载成功
 flag=1;
