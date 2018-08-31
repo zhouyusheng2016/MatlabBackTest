@@ -13,6 +13,7 @@ else
     PrePosition = Asset.Position{I-1};
     PreMargins = Asset.Margins{I-1};
 end
+
 Asset.CurrentStock = PreStock;
 Asset.CurrentPosition = PrePosition;
 Asset.CurrentMargins = PreMargins;
@@ -71,8 +72,12 @@ for i = 1:length(Asset.OrderPrice{I})
         unfrozeCash = 0;
         frozeCash = 0;
         if tradeVolume.Close~=0
-            % 自昨日的盈亏
-            lastSettlePrice = Data.PreSettle(I);                             
+            %%%%
+            % 同一日线 开-》平 仓会造成错误，因收盘价以上次结算价记录
+            % 故不允许同日开仓在平仓
+            %%%%
+            % 平昨的计算
+            lastSettlePrice = Data.PreSettle(I);                           
             priceChange = dealprice - lastSettlePrice;                      
             priceChangePerContract = priceChange*contractInfo.multiplier;   %每张合约的盈亏
             thisPositionPnL = -tradeVolume.Close*priceChangePerContract;    %平仓仓位的盈亏，未平仓的不按照交易价格结算
