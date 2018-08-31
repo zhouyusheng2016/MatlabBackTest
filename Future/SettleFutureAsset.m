@@ -36,23 +36,6 @@ for i = 1:length(Asset.CurrentStock)
        error('SettleFutureAsset.m: contract passed last trade date') 
     end
     flag_AtExpiration = lastTradeDateNum==today;
-    %% 合约到期的情况
-    if flag_AtExpiration
-        sprintf(strcat('Bar:', num2str(I), ' Date:', DB.TimesStr(I,:), ' Contract: ', Data.Code, ' Reached Expiration' ))
-        FrozenCash = FrozenCash - Asset.CurrentMargins(i);                 %释放冻结资金
-        AvaCash = AvaCash + Asset.CurrentMargins(i);  
-        fee = FutureTradeCommission(settlePrice, Asset.CurrentPosition(i), contractInfo, Options,'Open');% 目前不分开平都填写Open
-        AvaCash = AvaCash - fee;
-        Asset.DealFee{I} = [Asset.DealFee{I} fee];                          %平仓手续费录入
-        
-        ExpiredContract = [ExpiredContract  Asset.CurrentStock(i)];
-        ExpiredContractPosition = [ExpiredContractPosition Asset.CurrentPosition(i)];
-        ExpiredContractSettlePrice = [ExpiredContractSettlePrice, settlePrice];
-        % 释放股票信息
-        Asset.CurrentMargins(i) = 0;                                        %释放保证金
-        Asset.CurrentPosition(i) = 0;                                       %释放仓位 
-        continue;                                                           %到期卖出合约，close所有仓位，不需要结算保证金
-    end
     %% 每日无负债盯市
     % 今日交易量
     idx_todayTrade = strcmp(Asset.CurrentStock(i),Asset.DealStock{I});     %现持仓合约在交易结算合约中的位置
@@ -92,6 +75,24 @@ for i = 1:length(Asset.CurrentStock)
     
     Asset.CurrentMargins(i) = totalMarginThisContractAfterUpdate;           %更新至交易时账户的已用保证金数量
     FrozenCash = FrozenCash+thisMarginChange;                               %更新至交易时总已用保证金数量
+    
+    %% 合约到期的情况
+    if flag_AtExpiration
+        sprintf(strcat('Bar:', num2str(I), ' Date:', DB.TimesStr(I,:), ' Contract: ', Data.Code, ' Reached Expiration' ))
+        FrozenCash = FrozenCash - Asset.CurrentMargins(i);                 %释放冻结资金
+        AvaCash = AvaCash + Asset.CurrentMargins(i);
+        fee = FutureTradeCommission(settlePrice, Asset.CurrentPosition(i), contractInfo, Options,'Open');% 目前不分开平都填写Open
+        AvaCash = AvaCash - fee;
+        Asset.DealFee{I} = [Asset.DealFee{I} fee];                          %平仓手续费录入
+        
+        ExpiredContract = [ExpiredContract  Asset.CurrentStock(i)];
+        ExpiredContractPosition = [ExpiredContractPosition Asset.CurrentPosition(i)];
+        ExpiredContractSettlePrice = [ExpiredContractSettlePrice, settlePrice];
+        % 释放股票信息
+        Asset.CurrentMargins(i) = 0;                                        %释放保证金
+        Asset.CurrentPosition(i) = 0;                                       %释放仓位
+        continue;                                                           %到期卖出合约，close所有仓位，不需要结算保证金
+    end
     
     %% 维持保证金变化引起的资金变动
     %维持保证金
