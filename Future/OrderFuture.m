@@ -27,8 +27,8 @@ for k=0:Options.DelayDays % 交易失败则延迟交易
         %
         %自动前复权问题带修正此处
         %
-        cond(2) = -9.9<=Data.Pct_chg{I+OrderDay+k};                         %根据收盘价确定涨停存在问题 %跌停限制
-        cond(3) = Data.Pct_chg{I+OrderDay+k}<=9.9;                          %根据收盘价确定跌停存在问题 %涨停限制
+        cond(2) = true;%-9.9<=Data.Pct_chg{I+OrderDay+k};                         %根据收盘价确定涨停存在问题 %跌停限制
+        cond(3) = true;%Data.Pct_chg{I+OrderDay+k}<=9.9;                          %根据收盘价确定跌停存在问题 %涨停限制
         %合约存续
         today = Data.Times(I+OrderDay+k);
         lasttrade_date = datenum(datetime(Data.Info{1}));
