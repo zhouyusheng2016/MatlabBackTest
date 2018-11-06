@@ -71,9 +71,12 @@ for i = 1:numOfVars
     else
         useStrike = tarStrikes(varargin{i}{3});
     end
-    
-    idx_tarStrike = strikes == useStrike;
-    targetedData(i) = thisData(idx_tarStrike);
+    if ~isempty(useStrike)                                                  %存在给定合约不存在的情况
+        idx_tarStrike = strikes == useStrike;
+        targetedData(i) = thisData(idx_tarStrike);
+    else
+        targetedData(i) = cell(1,1);                                        %不存在则返回空值
+    end
 end
 
 Data = targetedData;
