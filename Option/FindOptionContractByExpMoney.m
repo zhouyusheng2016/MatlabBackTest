@@ -12,14 +12,14 @@ num = length(tradeables);
 Datas = arrayfun(@(n) getfield(OptDB, tradeables{n}),1:num,'UniformOutPut',0);
 %% extract Info
 contractunit = arrayfun(@(n)Datas{n}.ContractUnit(I),1:num);
-idx_adjContract = contractunit==1e5; %调整合约
-Datas(idx_adjContract) = {};%不考虑调整合约
+idx_adjContract = contractunit~=1e4; %调整合约
+Datas = Datas(~idx_adjContract);%不考虑调整合约
+num = length(Datas);% 更新Datas长度
 % 期限
 daysLeft = arrayfun(@(n)Datas{n}.DaysUntilExpiration(I),1:num);%剩余时限
 uniqueDaysLeft = unique(daysLeft);
 %类型
 type = arrayfun(@(n)char(Datas{n}.Info{1}),1:num,'UniformOutput',0);
-
 %% selection
 numOfVars = length(varargin);
 targetedData = cell(numOfVars,1);
