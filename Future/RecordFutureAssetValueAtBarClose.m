@@ -4,6 +4,6 @@ cashAsset = Asset.Cash(I);                                                  %ÏÖ½
 
 forzenMargin = Asset.Margins{I};                                            %±£Ö¤½ð
 
-Asset.GrossAssets(I) = cashAsset+forzenMargin;
+Asset.GrossAssets(I) = cashAsset+sum(forzenMargin);
 end
 

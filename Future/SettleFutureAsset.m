@@ -97,13 +97,15 @@ for i = 1:length(Asset.CurrentStock)
     %% 维持保证金变化引起的资金变动
     %维持保证金
     thisContractMaintainMargin = CalculateMaintainMargin(Asset.CurrentPosition(i),contractInfo,settlePrice);% 维持保证金
-    % 每个合约的保证及n
-    %% 催缴保证金
-    if thisContractMaintainMargin> Asset.CurrentMargins(i)
-        marginCallThisContract = thisContractMaintainMargin - Asset.CurrentMargins(i);
-        Asset.MarginCallStock{I} =[Asset.MarginCallStock{I} Asset.CurrentStock(i)];
-        Asset.MarginCallAmount{I} = [Asset.MarginCallAmount{I} marginCallThisContract];
-    end
+    % 自动更新保证金至交易账户
+    marginChange = thisContractMaintainMargin - Asset.CurrentMargins(i);
+    Asset.CurrentMargins(i) = thisContractMaintainMargin;
+    AvaCash = AvaCash-marginChange;
+    FrozenCash = FrozenCash+marginChange;
+end
+%% 催缴保证金
+if AvaCash < 0
+    Asset.MarginCall(I) = AvaCash;
 end
 %如果交易后导致部分合约空仓，在当前持仓中清除空仓的合约
 idxClearEmpty = Asset.CurrentPosition == 0;
