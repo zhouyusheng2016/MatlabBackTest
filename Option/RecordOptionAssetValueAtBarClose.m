@@ -7,7 +7,7 @@ forzenMargin = Asset.Margins{I};                                            %±£÷
 close = [];                                                                 %∞¥’’π…∆±√˚≥∆ªÒ»°µ±ÃÏ ’≈Ãº€
 contractUnit = [];                                                          %∆⁄»®∫œ‘º≥À ˝
 for i = 1:length(Stock)
-     Data = getfield(DB,code2structname(Stock{i}, 'O'));
+     Data = getfield(DB,code2structname(Stock{i}, Options.OptionType));
      close = [close Data.Close(I)];
      contractUnit = [contractUnit Data.ContractUnit(I)];
 end

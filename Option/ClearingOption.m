@@ -26,7 +26,7 @@ for i = 1:length(Asset.OrderPrice{I})
     dealprice = OrderPirceWithSlippage(Asset.OrderPrice{I}(i), Asset.OrderVolume{I}(i), Options);
     %% 检查限制交易量占市场比
     dealvolume = [];
-    Data=getfield(DB,code2structname(Asset.OrderStock{I}{i},'O'));
+    Data=getfield(DB,code2structname(Asset.OrderStock{I}{i},Options.OptionType));
     dealvolume = AdaptDealVolumeToMarket(I,Data,Asset.OrderVolume{I}(i),Options);
     dealvolume = floor(dealvolume);                                         % 必须整数买入
 

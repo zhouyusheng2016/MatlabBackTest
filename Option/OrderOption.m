@@ -15,7 +15,7 @@ else
     ordertype = '卖出';
 end
 flag = 0;
-Data=getfield(DB,code2structname(stock,'O'));
+Data=getfield(DB,code2structname(stock,Options.OptionType));
 for k=0:Options.DelayDays % 交易失败则延迟交易
     if I+OrderDay+k <= DB.NK
         cond_(1,1) = ~isnan(Data.Open(I+OrderDay+k));

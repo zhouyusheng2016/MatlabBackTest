@@ -17,7 +17,7 @@ today = DB.Times(I);                                                        %Ω·À
 MaginCall = 0;
 for i = 1:length(Asset.CurrentStock)
     %% ∫œ‘º–≈œ¢
-    Data=getfield(DB,code2structname(Asset.CurrentStock{i},'O')); 
+    Data=getfield(DB,code2structname(Asset.CurrentStock{i},Options.OptionType)); 
     contractInfo = GetOptionContractInfo(Data);                             %∫œ‘ºª˘±æ–≈œ¢
     contractUnit = Data.ContractUnit(I);                                    %∫œ‘ºµ•Œª
     Strike = Data.Strike(I);                                                %∫œ‘º––»®º€

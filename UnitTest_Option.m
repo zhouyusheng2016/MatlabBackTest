@@ -1,4 +1,5 @@
 %% set path to backtest frame work folder
+%% 50ETF期权测试
 backtestDicPath = strcat(matlabroot,'\bin\MatlabBackTest\');
 futrueDicPath = strcat(backtestDicPath,'Future');
 optionDicPath = strcat(backtestDicPath,'Option');
@@ -209,7 +210,17 @@ DB.CurrentK = 1;
 Asset = OrderOption(DB,Asset,Signal{1}.Stock, -Signal{1}.Volume,Data1.Open(1),Signal{1}.Type,Options);
 Asset = OrderOption(DB,Asset,Signal{1}.Stock, +Signal{1}.Volume,Data1.Open(1),Signal{1}.Type,Options);
 Asset = ClearingOption(Asset,DB,Options);
- 
+
+%% 期货期权测试
+% 使用 OptDB
+Options.OptionType = 'CommodityOption';
+Options.OptLastSettlementType = 'Settle';
+
+
+ Asset = InitOptionAsset(OptDB,Options);
+ OptDB.CurrentK = 1;
+
+ Asset = OrderOption(OptDB,Asset,'CU1901C46000', 2,OptDB.CU1901C46000.Open(OptDB.CurrentK),'Today',Options);
  
  
  

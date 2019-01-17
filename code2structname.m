@@ -1,6 +1,6 @@
-function [ s ] = code2structname( string, type)
+function [ s ] = code2structname(string, type)
 switch type
-    case 'O'
+    case '50ETFOption'
         s = strcat('OPT', string(1:8));
     case 'F'
         if length(string) == 8
@@ -10,6 +10,8 @@ switch type
         end
     case 'S'
         s = [string(8:9) string(1:6)];
+    case 'CommodityOption'
+        s = string;
     otherwise
         disp('other value')
 end
