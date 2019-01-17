@@ -1,6 +1,6 @@
 %% 测试
 start_time = '2015-02-09';
-end_time = '2018-10-31';
+end_time = '2018-12-28';
 RateType = 'GC';
 % 证券交易账户选项设置
 GCOptions.InitCash = 1000000;

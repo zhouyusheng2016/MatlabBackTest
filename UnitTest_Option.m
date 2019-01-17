@@ -153,10 +153,66 @@ for I = 1:DB.NK
     all = [all;optInfo];
 end
 toc% 784天20s
-%% 
+%% 缺陷解决：本框架不支持同一根K线换仓后查询资产再度开仓
+ % 原因：当采用Order下单后，由于未进行clearing,账户资产未更新
+ % 故不能确定同跟K线上新开仓位的资金是否超过可用现金
+ % 解决方法： 平仓后立即执行Clearing，通过当前游标（T）查询当日的资产情况
+ % 确定Asset.Cash(I), Asset.FrozenCash(I)等，由新的资产信息确定新开仓
+ % 当时的资产情况，
+ % clearing后，需要消除本次虚假clearing存储到（I）时间点的信息。
+ % 最后本方法，不需要调动Settle
  
+ % 测试：
+%按照前格式下单
+DB.CurrentK = 1;
+% 同一日清算两次，记录首次清算结果
+Asset = ClearingOption(Asset,DB,Options);
+AssetFirstClearing = Asset;
+Asset = ClearingOption(Asset,DB,Options);
+AssetSecondClearing = Asset;
+AssetSecondClearing = UnClearingOptionAsset(Asset,I);
+% 结果对比
+%相同结果
+AssetFirstClearing.Cash(DB.CurrentK) == AssetSecondClearing.Cash(DB.CurrentK)
+AssetFirstClearing.FrozenCash(DB.CurrentK) == AssetSecondClearing.FrozenCash(DB.CurrentK)
+AssetFirstClearing.Margins{DB.CurrentK} == AssetSecondClearing.Margins{DB.CurrentK}
+strcmp(AssetFirstClearing.MarginStock{DB.CurrentK}, AssetSecondClearing.MarginStock{DB.CurrentK})
 
+AssetFirstClearing.CurrentPosition == AssetSecondClearing.CurrentPosition
+AssetFirstClearing.CurrentMargins == AssetSecondClearing.CurrentMargins
 
+% 变化的结果 --- 只改变了Deal字段，因为Deal为append形式
+AssetFirstClearing.DealStock{DB.CurrentK}
+AssetSecondClearing.DealStock{DB.CurrentK}
+AssetFirstClearing.DealVolume{DB.CurrentK}
+AssetSecondClearing.DealVolume{DB.CurrentK}
+AssetFirstClearing.DealPrice{DB.CurrentK}
+AssetSecondClearing.DealPrice{DB.CurrentK}
+AssetFirstClearing.DealFee{DB.CurrentK}
+AssetSecondClearing.DealFee{DB.CurrentK}
+% 需要重置deal字段，其余字段可不重置
+ 
+%% 同一k线买卖相同股票
+Asset = InitOptionAsset(DB,Options);
+DB.CurrentK = 1;
+%先买再卖
+Signal{1}.Volume = 5;
+Signal{1}.Stock = optionFieldnames{1}(4:end);
+Signal{1}.Type = 'Today';
+Data1 = getfield(DB, optionFieldnames{1});
+Asset = OrderOption(DB,Asset,Signal{1}.Stock, Signal{1}.Volume,Data1.Open(1),Signal{1}.Type,Options);
+Asset = OrderOption(DB,Asset,Signal{1}.Stock, -Signal{1}.Volume,Data1.Open(1),Signal{1}.Type,Options);
+Asset = ClearingOption(Asset,DB,Options);
+%先卖再买
+Asset = InitOptionAsset(DB,Options);
+DB.CurrentK = 1;
+Asset = OrderOption(DB,Asset,Signal{1}.Stock, -Signal{1}.Volume,Data1.Open(1),Signal{1}.Type,Options);
+Asset = OrderOption(DB,Asset,Signal{1}.Stock, +Signal{1}.Volume,Data1.Open(1),Signal{1}.Type,Options);
+Asset = ClearingOption(Asset,DB,Options);
+ 
+ 
+ 
+ 
 
 
 
