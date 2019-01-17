@@ -6,14 +6,16 @@ function [ Data ] = Find50ETFOptionContractByExpMoney( OptDB, I,varargin)
 % varargin{}{4} -- expiraiton: 1 for current monty, 2for next month,...
 % varargin{}{5} -- option type : call/ put
 % 采用1e4作为未调整合约的合约乘数
+% 本方法不考虑调整合约，至获取非调整合约
 
 %% data gethering
 tradeables = OptDB.TradeableOptionField{I};
 num = length(tradeables);
 Datas = arrayfun(@(n) getfield(OptDB, tradeables{n}),1:num,'UniformOutPut',0);
 %% extract Info
-contractunit = arrayfun(@(n)Datas{n}.ContractUnit(I),1:num);
-idx_adjContract = contractunit~=1e4; %调整合约
+symbol = char(arrayfun(@(n)Datas{n}.Symbol(I),1:num));
+idx_adjContract = symbol(:,12)~='M'; %调整合约
+
 Datas = Datas(~idx_adjContract);%不考虑调整合约
 num = length(Datas);% 更新Datas长度
 % 期限
