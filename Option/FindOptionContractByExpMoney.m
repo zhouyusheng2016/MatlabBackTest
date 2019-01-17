@@ -1,10 +1,11 @@
-function [ Data ] = FindOptionContractByExpMoney( OptDB, I,varargin);
+function [ Data ] = FindOptionContractByExpMoney( OptDB, I,varargin)
 % OptDB -- 期权数据结构
 % varargin{}{1} -- undelryign price type： close/open
 % varargin{}{2} -- option moneyness : otm/ itm
 % varargin{}{3} -- number of strikes divegerd from underlying price
 % varargin{}{4} -- expiraiton: 1 for current monty, 2for next month,...
 % varargin{}{5} -- option type : call/ put
+% 采用1e4作为未调整合约的合约乘数
 
 %% data gethering
 tradeables = OptDB.TradeableOptionField{I};
