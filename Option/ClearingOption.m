@@ -104,12 +104,8 @@ for i = 1:length(Asset.OrderPrice{I})
         if tradeVolume.Open~=0
             marginPerContract = 0;
             if tradeVolume.Open < 0     % 空仓开仓
-                % 卖出合约，收取保证金
-                Underlying = GetOptionUnderlyingStruct(DB, Data,Options);  
-                underlyingPreClose = Underlying.PreClose(I);                     %合约标的的前收盘价
-                lastSettle = GetOptionContractPreSettlePriceByType( Data,...        %合约的前结算价
-                    I, Options.OptLastSettlementType);
-                margin = CalculateMargin(lastSettle,underlyingPreClose,Data.Strike(I), contractInfo);
+                % 卖出合约，收取保证金                           
+                margin = CalculateInitialMarginUseData(DB, Data,I,Options); 
                 marginPerContract = margin*contractUnit;                    %每手期权的义务开仓保证金     
             end
             

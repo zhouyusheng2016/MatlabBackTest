@@ -61,15 +61,8 @@ for i = 1:length(Asset.CurrentStock)
        continue; 
     end
     %% 本次结算价格
-    if strcmp(Options.OptLastSettlementType,'Close')
-        settlePrice = Data.Close(I);
-    elseif strcmp(Options.OptLastSettlementType,'Settle')
-        settlePrice = Data.Settle(I);
-    else
-        error('SettleOptionAsset.m: Undefined Settle Price')
-    end
     %计算维持保证金
-    maintainMargin = CalculateMargin(settlePrice,Underlying.Close(I),Strike,contractInfo);
+    maintainMargin = CalculateMaintainMarginUseData(DB, Data,I,Options);
     totalMaintainMarginThisContract = maintainMargin*abs(Asset.CurrentPosition(i))*contractUnit;
     %目前账户已用保证金余额
     idx_thisStockMargin = strcmp(Asset.CurrentStock(i), Asset.CurrentMarginStock);
