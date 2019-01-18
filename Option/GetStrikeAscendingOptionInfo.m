@@ -3,7 +3,6 @@ function [ table ] = GetStrikeAscendingOptionInfo(DB, I, tradeableOptNames)
 % DB必须为同一标的期权的数据结构
 % I 为时间游标，代表本K线
 % 输出为option基本信息表
-UnderlyingOpen = DB.Underlying.Open(I);                                     % K线开盘价
 tradeableOptNames = tradeableOptNames(:);                                   % 格式N X 1
 %检索分类信息
 contractInfo = [];
