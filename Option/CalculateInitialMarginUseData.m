@@ -1,5 +1,6 @@
 function [ margin ] = CalculateInitialMarginUseData(DB, Data,I,Options)
-underlyingPreClose = DB.Underlying.PreClose(I);                             %合约标的前收盘价
+Underlying = GetOptionUnderlyingStruct(DB, Data,Options);                   %合约标的前收盘价
+underlyingPreClose = Underlying.PreClose(I); 
 lastSettle = GetOptionContractPreSettlePriceByType( Data,...                %合约的前结算价
     I, Options.OptLastSettlementType);
 contractInfo = GetOptionContractInfo(Data);

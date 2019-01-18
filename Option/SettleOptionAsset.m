@@ -18,6 +18,7 @@ MaginCall = 0;
 for i = 1:length(Asset.CurrentStock)
     %% 合约信息
     Data=getfield(DB,code2structname(Asset.CurrentStock{i},Options.OptionType)); 
+    Underlying = GetOptionUnderlyingStruct(DB, Data,Options);               %合约标的
     contractInfo = GetOptionContractInfo(Data);                             %合约基本信息
     contractUnit = Data.ContractUnit(I);                                    %合约单位
     Strike = Data.Strike(I);                                                %合约行权价
@@ -30,7 +31,7 @@ for i = 1:length(Asset.CurrentStock)
     %% 合约到期结算
     if flag_atExpirary
         % 结算合约
-        payoff = CalculateOptionPayoff(DB.Underlying.Close(I), Strike,...
+        payoff = CalculateOptionPayoff(Underlying.Close(I), Strike,...
             contractInfo, contractUnit, Asset.CurrentPosition(i));
         releaseMargin = 0;
         if Asset.CurrentPosition(i) < 0
@@ -68,7 +69,7 @@ for i = 1:length(Asset.CurrentStock)
         error('SettleOptionAsset.m: Undefined Settle Price')
     end
     %计算维持保证金
-    maintainMargin = CalculateMargin(settlePrice,DB.Underlying.Close(I),Strike,contractInfo);
+    maintainMargin = CalculateMargin(settlePrice,Underlying.Close(I),Strike,contractInfo);
     totalMaintainMarginThisContract = maintainMargin*abs(Asset.CurrentPosition(i))*contractUnit;
     %目前账户已用保证金余额
     idx_thisStockMargin = strcmp(Asset.CurrentStock(i), Asset.CurrentMarginStock);

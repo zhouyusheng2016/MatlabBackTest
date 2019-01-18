@@ -105,7 +105,8 @@ for i = 1:length(Asset.OrderPrice{I})
             marginPerContract = 0;
             if tradeVolume.Open < 0     % 空仓开仓
                 % 卖出合约，收取保证金
-                underlyingPreClose = DB.Underlying.PreClose(I);                     %合约标的的前收盘价
+                Underlying = GetOptionUnderlyingStruct(DB, Data,Options);  
+                underlyingPreClose = Underlying.PreClose(I);                     %合约标的的前收盘价
                 lastSettle = GetOptionContractPreSettlePriceByType( Data,...        %合约的前结算价
                     I, Options.OptLastSettlementType);
                 margin = CalculateMargin(lastSettle,underlyingPreClose,Data.Strike(I), contractInfo);
