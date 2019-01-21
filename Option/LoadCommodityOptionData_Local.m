@@ -116,6 +116,10 @@ for code = codes'
    DB.Settle(idx_haveData) = thisUnderlying.settle;
    DB.PreSettle = nan(timeLength,1);
    DB.PreSettle(idx_haveData) = thisUnderlying.pre_settle;
+   DB.ContractUnit = nan(timeLength,1);
+   DB.ContractUnit(idx_haveData) = thisUnderlying.contractmultiplier;
+   DB.Margin = nan(timeLength,1);
+   DB.Margin(idx_haveData) = thisUnderlying.margin;
    
    Underlying=setfield(Underlying,structName,DB);
 end
