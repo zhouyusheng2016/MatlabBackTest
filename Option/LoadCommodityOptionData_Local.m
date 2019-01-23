@@ -30,7 +30,7 @@ for code = codes'
     DB.TimesStr = datestr(w_wsd_times_0,'yymmdd');%按年月日格式的时间戳（交易日）
     [~,idx_haveData,~] = intersect(w_wsd_times_0,dataTime);
     % 期权合约信息
-    structName = char(code);
+    structName = upper(char(code));
     DB.Code =  structName;
     %记录C/P 到期日 标的代码
     DB.Info = {thisOpt.OptionType(1)...
@@ -95,7 +95,7 @@ for code = codes'
    [~,idx_haveData,~] = intersect(w_wsd_times_0,dataTime);
    
    codeSplit = split(char(code),'.');
-   structName = codeSplit{1};
+   structName = upper(codeSplit{1});
    DB.Times = w_wsd_times_0;
    DB.TimesStr = datestr(w_wsd_times_0,'yymmdd');
    DB.Open = nan(timeLength,1);
@@ -119,7 +119,7 @@ for code = codes'
    DB.ContractUnit = nan(timeLength,1);
    DB.ContractUnit(idx_haveData) = thisUnderlying.contractmultiplier;
    DB.Margin = nan(timeLength,1);
-   DB.Margin(idx_haveData) = thisUnderlying.margin;
+   DB.Margin(idx_haveData) = thisUnderlying.margin/100;
    
    Underlying=setfield(Underlying,structName,DB);
 end
