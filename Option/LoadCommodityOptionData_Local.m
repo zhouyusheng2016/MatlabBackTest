@@ -35,7 +35,7 @@ for code = codes'
     %记录C/P 到期日 标的代码
     DB.Info = {thisOpt.OptionType(1)...
         datetime(num2str(thisOpt.Expiration(1)),'InputFormat','yyyyMMdd')...
-        thisOpt.UnderlyingSymbol(1,:)};
+        upper(thisOpt.UnderlyingSymbol(1,:))};
     % 期权行情信息
     DB.Open = nan(timeLength,1);
     DB.Open(idx_haveData) = thisOpt.open;%开
