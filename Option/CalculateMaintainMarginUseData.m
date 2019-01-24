@@ -8,6 +8,13 @@ settle = GetOptionContractSettlePriceByType( Data,...                 %∫œ‘º«∞Ω·À
     I, Options.SettlementType);
 
 contractInfo = GetOptionContractInfo(Data);
-
-margin = CalculateMargin(settle,underlyingSettle,Data.Strike(I), contractInfo);
+if strcmp(Options.OptionType, 'CommodityOption')
+    margin = CalculateMargin(settle,underlyingSettle,Data.Strike(I), contractInfo,Options.OptionType, underlyingSettle*Underlying.Margin(I));
+    return
+end
+if strcmp(Options.OptionType, '50ETFOption')
+    margin = CalculateMargin(settle,underlyingSettle,Data.Strike(I), contractInfo);
+    return
+end
+error('No MaintainMargin Calculated')
 end

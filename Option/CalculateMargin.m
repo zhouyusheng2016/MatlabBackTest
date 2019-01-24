@@ -13,8 +13,9 @@ if nargin == 4 || strcmp(varargin{1}, '50ETFOption')
 end
 
 %% 白糖铜豆粕 option的保证金计算方式
-if nargin == 5 && strcmp(varargin{1}, 'CommodityOption')
-    margin = CalculateCommodityOptionMargin(price,underlying,Strike,contractInfo);
+if nargin == 6 && strcmp(varargin{1}, 'CommodityOption')
+    underlyingMargin = varargin{2};
+    margin = CalculateCommodityOptionMargin(price,underlying,underlyingMargin,Strike,contractInfo);
     return
 end
 
