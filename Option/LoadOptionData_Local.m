@@ -23,7 +23,7 @@ for code = codes'
     DB.TimesStr = datestr(w_wsd_times_0,'yymmdd');%按年月日格式的时间戳（交易日）
     [~,idx_haveData,~] = intersect(w_wsd_times_0,dataTime);
     % 期权合约信息
-    structName = code2structname(num2str(code), 'O');
+    structName = code2structname(num2str(code), '50ETFOption');
     DB.Code =  num2str(code);
     %记录C/P 到期日 标的代码
     DB.Info = {thisOpt.OptionType(1) thisOpt.Expiration(1) thisOpt.UnderlyingSymbol(1)};
